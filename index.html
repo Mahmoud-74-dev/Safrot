@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منيو سفروت - منفلوط</title>
     <link rel="stylesheet" href="style.css?v=2">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600;700;800&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600;700;800&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff6b00">
@@ -45,7 +46,197 @@
         .offer-add-btn:hover  { opacity: 0.9; }
         .offer-add-btn:active { transform: scale(0.96); }
 
-        /* مربعات الاختيار */
+        /* ══════════════ CART FAB ══════════════ */
+        .cart-fab {
+            position: fixed; bottom: 1.6rem; left: 1.6rem; z-index: 90;
+            width: 58px; height: 58px; border-radius: 18px;
+            background: #ff6a1a;
+            color: white; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 28px rgba(255,106,26,0.45);
+            transition: transform .2s, box-shadow .2s;
+        }
+        .cart-fab:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,106,26,0.55); }
+        .cart-fab:active { transform: scale(.95); }
+        .cart-badge {
+            position: absolute; top: -6px; right: -6px;
+            background: #fff; color: #ff6a1a;
+            font-size: .7rem; font-weight: 800;
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Almarai', sans-serif;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .cart-fab.bump { animation: cartBump .25s ease; }
+        @keyframes cartBump { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+        /* ══════════════ CART DRAWER ══════════════ */
+        .cart-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); z-index: 95;
+            backdrop-filter: blur(4px);
+        }
+        .cart-overlay.open { display: block; animation: fadeIn .2s ease; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+        .cart-drawer {
+            position: fixed; bottom: .6rem; left: 0; right: 0; z-index: 96;
+            transform: translateY(110%);
+            transition: transform .35s cubic-bezier(.32,.72,0,1);
+            height: 55vh;
+            padding: 0 .7rem;
+        }
+        .cart-drawer.active { transform: translateY(0); }
+
+        .cart-drawer-inner {
+            background: rgba(14,14,14,0.75);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border-radius: 22px 22px 16px 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            display: flex; flex-direction: column;
+            height: 100%; overflow: hidden;
+        }
+
+        /* TOP */
+        .cart-top {
+            padding: 1rem 1.2rem .8rem;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+        }
+        /* handle bar */
+        .cart-top::before {
+            content: ''; position: absolute;
+            top: .6rem; left: 50%; transform: translateX(-50%);
+            width: 36px; height: 4px; border-radius: 2px;
+            background: rgba(255,255,255,0.15);
+        }
+        .cart-drawer-inner { position: relative; }
+        .cart-top-title { font-family: 'El Messiri', sans-serif; font-size: 1.15rem; font-weight: 700; color: #ede8e3; }
+        .cart-top-count { font-size: .78rem; color: rgba(237,232,227,0.4); font-weight: 600; margin-right: .5rem; }
+        .cart-close-btn {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(255,255,255,0.07); border: none;
+            color: rgba(237,232,227,0.6); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .15s;
+        }
+        .cart-close-btn:hover { background: rgba(255,255,255,0.12); color: #ede8e3; }
+
+        /* ITEMS */
+        .cart-items-wrap {
+            flex: 1; overflow-y: auto; padding: .8rem 1.2rem;
+            scrollbar-width: none;
+        }
+        .cart-items-wrap::-webkit-scrollbar { display: none; }
+
+        .cart-empty {
+            text-align: center; padding: 2.5rem 1rem;
+            color: rgba(237,232,227,0.3);
+        }
+        .cart-empty-icon { font-size: 2.5rem; margin-bottom: .5rem; opacity: .4; }
+        .cart-empty-text { font-size: .88rem; }
+
+        .cart-item {
+            display: flex; align-items: center; gap: .8rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item-info { flex: 1; min-width: 0; }
+        .cart-item-name { font-weight: 700; color: #ede8e3; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cart-item-variant { font-size: .75rem; color: rgba(237,232,227,0.4); margin-top: 1px; }
+        .cart-item-price { font-size: .88rem; font-weight: 700; color: #ff6a1a; margin-top: 2px; font-family: 'El Messiri', sans-serif; }
+
+        .cart-qty {
+            display: flex; align-items: center; gap: .4rem; flex-shrink: 0;
+        }
+        .qty-btn {
+            width: 28px; height: 28px; border-radius: 8px;
+            background: rgba(255,255,255,0.07); border: none;
+            color: #ede8e3; cursor: pointer; font-size: 1rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .15s;
+        }
+        .qty-btn:hover { background: rgba(255,106,26,0.25); color: #ff6a1a; }
+        .qty-num { font-size: .9rem; font-weight: 800; color: #ede8e3; min-width: 18px; text-align: center; font-family: 'El Messiri', sans-serif; }
+        .cart-del-btn {
+            width: 28px; height: 28px; border-radius: 8px;
+            background: rgba(255,61,87,0.1); border: none;
+            color: rgba(255,61,87,0.6); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .15s; flex-shrink: 0;
+        }
+        .cart-del-btn:hover { background: rgba(255,61,87,0.2); color: #ff3d57; }
+
+        /* INFO FIELDS */
+        .cart-info-section {
+            padding: .7rem 1.2rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex; flex-direction: column; gap: .5rem;
+            flex-shrink: 0;
+        }
+        .cart-info-field {
+            display: flex; align-items: center; gap: .6rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px; padding: .6rem .9rem;
+            transition: border-color .2s;
+        }
+        .cart-info-field:focus-within { border-color: rgba(255,106,26,0.4); }
+        .cart-info-icon { font-size: .9rem; flex-shrink: 0; }
+        .cart-info-input {
+            flex: 1; background: none; border: none; outline: none;
+            color: #ede8e3; font-family: 'Almarai', sans-serif; font-size: .85rem;
+        }
+        .cart-info-input::placeholder { color: rgba(237,232,227,0.25); }
+
+        /* BOTTOM */
+        .cart-bottom {
+            padding: .8rem 1.2rem 1.2rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+        }
+        .cart-total-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: .8rem;
+        }
+        .cart-total-label { font-size: .82rem; color: rgba(237,232,227,0.45); font-weight: 600; }
+        .cart-total-val { font-family: 'El Messiri', sans-serif; font-size: 1.3rem; font-weight: 700; color: #ff6a1a; }
+        .cart-order-btn {
+            width: 100%; padding: 14px;
+            background: #ff6a1a; color: white; border: none; border-radius: 14px;
+            font-family: 'El Messiri', sans-serif; font-size: 1.05rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5rem;
+            box-shadow: 0 6px 20px rgba(255,106,26,0.4);
+            transition: background .2s, transform .1s, box-shadow .2s;
+        }
+        .cart-order-btn:hover { background: #e04e00; box-shadow: 0 8px 28px rgba(255,106,26,0.5); }
+        .cart-order-btn:active { transform: scale(.98); }
+
+        /* hide old classes */
+        .cart-footer, .cart-header, .cart-order-info, .cart-field,
+        .cart-sidebar, .order-btn, .total { display: none !important; }
+        body, input, textarea, button, select {
+            font-family: 'Almarai', sans-serif !important;
+        }
+        h1, h2, h3,
+        .slogan,
+        .accordion,
+        .item span,
+        .item-info span,
+        .cart-header h2,
+        .order-btn,
+        .price {
+            font-family: 'El Messiri', sans-serif !important;
+        }
+        /* ضبط الأوزان */
+        h1 { font-weight: 800 !important; letter-spacing: -0.5px; }
+        .slogan { font-weight: 600 !important; }
+        .accordion { font-weight: 700 !important; font-size: 1.05rem !important; }
+        .price { font-weight: 700 !important; }
+        .order-btn { font-weight: 700 !important; letter-spacing: 0.3px; }
         .choice-card {
             display: flex; align-items: center; justify-content: space-between;
             padding: 13px 16px; margin: 7px 0;
@@ -57,9 +248,71 @@
         .choice-card.selected { border-color: #ff6a1a; background: rgba(255,106,26,0.18); transform: scale(1.02); }
         .choice-label { font-family:'Cairo',sans-serif; font-weight:700; font-size:1rem; color:#f0ebe5; }
         .choice-price { font-family:'Cairo',sans-serif; font-weight:900; font-size:.95rem; color:#ff6a1a; background:rgba(255,106,26,0.12); padding:3px 10px; border-radius:20px; }
+
+        /* حقول العنوان والملاحظات */
+        .cart-order-info { padding: 0 1rem 0.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+        .cart-field label { display: block; font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.5); margin-bottom: 4px; font-family: 'Cairo', sans-serif; }
+        .cart-field input,
+        .cart-field textarea {
+            width: 100%; padding: 10px 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1.5px solid rgba(255,106,26,0.2);
+            border-radius: 10px; color: #f0ebe5;
+            font-family: 'Cairo', sans-serif; font-size: 0.9rem;
+            resize: none; transition: border-color .2s;
+        }
+        .cart-field input::placeholder,
+        .cart-field textarea::placeholder { color: rgba(255,255,255,0.25); }
+        .cart-field input:focus,
+        .cart-field textarea:focus { outline: none; border-color: #ff6a1a; background: rgba(255,106,26,0.07); }
+        /* ── INTRO SCREEN ── */
+        #introScreen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #080808;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 1rem;
+            transition: opacity .5s ease, visibility .5s ease;
+        }
+        #introScreen.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+        .intro-logo {
+            width: 90px; height: 90px; border-radius: 24px; object-fit: contain;
+            filter: drop-shadow(0 0 24px rgba(255,106,26,0.6));
+            animation: introPop .6s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes introPop { from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+        .intro-name {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 2rem; font-weight: 800; color: #ede8e3;
+            animation: introFade .5s .2s ease both;
+        }
+        .intro-sub {
+            font-size: .85rem; color: rgba(237,232,227,0.35);
+            animation: introFade .5s .35s ease both;
+        }
+        .intro-bar {
+            width: 120px; height: 3px; border-radius: 3px;
+            background: rgba(255,255,255,0.08); overflow: hidden;
+            animation: introFade .5s .4s ease both;
+        }
+        .intro-bar-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #e04e00, #ff6a1a);
+            border-radius: 3px;
+            animation: introLoad 2.8s .2s ease forwards;
+        }
+        @keyframes introFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes introLoad { from{width:0%} to{width:100%} }
     </style>
 </head>
 <body>
+
+    <!-- انتر سكرين -->
+    <div id="introScreen">
+        <img src="safrot.png" class="intro-logo" alt="سفروت" onerror="this.style.display='none'">
+        <div class="intro-name">سفروت</div>
+        <div class="intro-sub">أجمد كريب في منفلوط 🔥</div>
+        <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+    </div>
 
     <header>
         <div class="logo-wrapper">
@@ -96,22 +349,57 @@
         </div>
     </div>
 
+    <!-- زرار السلة -->
     <div id="cartTrigger" class="cart-fab" onclick="toggleCart()">
-        <i class="fas fa-shopping-basket"></i>
-        <span id="cartCount">0</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span id="cartCount" class="cart-badge">0</span>
     </div>
 
-    <div id="cartModal" class="cart-sidebar">
-        <div class="cart-header">
-            <h2>سلة الطلبات</h2>
-            <button onclick="toggleCart()" class="close-cart">&times;</button>
-        </div>
-        <div id="cartItems"></div>
-        <div class="cart-footer">
-            <div class="total">الإجمالي: <span id="cartTotal">0</span> ج</div>
-            <button onclick="sendOrder()" class="order-btn">إتمام الطلب 🛵</button>
+    <!-- السلة -->
+    <div id="cartModal" class="cart-drawer">
+        <div class="cart-drawer-inner">
+
+            <!-- الهيدر -->
+            <div class="cart-top">
+                <div class="cart-top-info">
+                    <span class="cart-top-title">طلبك</span>
+                    <span class="cart-top-count" id="cartTopCount">0 صنف</span>
+                </div>
+                <button class="cart-close-btn" onclick="toggleCart()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <!-- الأصناف -->
+            <div class="cart-items-wrap" id="cartItems"></div>
+
+            <!-- العنوان والملاحظات -->
+            <div class="cart-info-section">
+                <div class="cart-info-field">
+                    <div class="cart-info-icon">📍</div>
+                    <input type="text" id="customerAddress" class="cart-info-input" placeholder="عنوانك للتوصيل">
+                </div>
+                <div class="cart-info-field">
+                    <div class="cart-info-icon">✏️</div>
+                    <input type="text" id="customerNotes" class="cart-info-input" placeholder="ملاحظات (اختياري)">
+                </div>
+            </div>
+
+            <!-- الفوتر -->
+            <div class="cart-bottom">
+                <div class="cart-total-row">
+                    <span class="cart-total-label">الإجمالي</span>
+                    <span class="cart-total-val"><span id="cartTotal">0</span> ج</span>
+                </div>
+                <button onclick="sendOrder()" class="cart-order-btn">
+                    إتمام الطلب
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+            </div>
+
         </div>
     </div>
+    <div class="cart-overlay" onclick="toggleCart()"></div>
 
     <footer>
         <div class="footer-info">
@@ -126,6 +414,15 @@
     </footer>
 
     <script>
+    // ── انتر سكرين — يختفي لما المنيو يتحمل أو بعد 3 ثواني كحد أقصى ──
+    let introHidden = false;
+    function hideIntro() {
+        if (introHidden) return;
+        introHidden = true;
+        document.getElementById('introScreen').classList.add('hide');
+    }
+    setTimeout(hideIntro, 3000);
+
     // ============================================================
     // 🔥 Firebase Config
     // ============================================================
@@ -143,8 +440,28 @@
     firebase.initializeApp(firebaseConfig);
     const menuRef = firebase.database().ref('menu');
 
+    // ── يوم الإجازة — بعد initializeApp ──
+    firebase.database().ref('settings/offDay').on('value', snap => {
+        const offDay = snap.val();
+        if (offDay === null || offDay === undefined) return;
+        const today = new Date().getDay();
+        if (parseInt(offDay) === today) {
+            const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+            if (document.getElementById('offDayBanner')) return;
+            const banner = document.createElement('div');
+            banner.id = 'offDayBanner';
+            banner.style.cssText = `
+                background:rgba(255,61,87,0.12);border:1px solid rgba(255,61,87,0.3);
+                border-radius:14px;padding:.9rem 1.1rem;margin:.8rem 1rem 0;
+                text-align:center;font-weight:700;color:#ff6b6b;font-size:.95rem;
+            `;
+            banner.textContent = `🗓️ المطعم عنده إجازة ${days[today]} — هنشوفك تاني يوم! 🙏`;
+            document.querySelector('header').insertAdjacentElement('afterend', banner);
+        }
+    });
+
     // ============================================================
-    // 🔑 السر: اضغط اللوجو 3 مرات تتحول لصفحة الأدمن
+    // 🔑 السر: اضغط اللوجو 5 مرات تتحول لصفحة الأدمن
     // ============================================================
     let tapCount = 0, tapTimer;
     document.getElementById('logoBox').addEventListener('click', () => {
@@ -318,9 +635,10 @@
     // تحميل البيانات
     menuRef.on('value', snap => {
         const val = snap.val();
-        if (!val) { buildMenu([]); return; }
+        if (!val) { buildMenu([]); hideIntro(); return; }
         const arr = Array.isArray(val) ? val : Object.values(val);
         buildMenu(arr);
+        hideIntro();
     });
     </script>
 

@@ -102,38 +102,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // تحديث واجهة السلة
     function updateCartUI() {
-        const cartItems = document.getElementById('cartItems');
-        const cartCount = document.getElementById('cartCount');
-        const cartTotal = document.getElementById('cartTotal');
+        const cartItems   = document.getElementById('cartItems');
+        const cartTotal   = document.getElementById('cartTotal');
+        const cartBadge   = document.getElementById('cartCount');
+        const cartTopCount = document.getElementById('cartTopCount');
 
-        cartItems.innerHTML = '';
-        let total = 0;
-        let totalQty = 0;
+        let total = 0, totalQty = 0;
+        cart.forEach(item => { total += item.price * item.qty; totalQty += item.qty; });
 
-        cart.forEach((item, index) => {
-            total    += item.price * item.qty;
-            totalQty += item.qty;
-            cartItems.innerHTML += `
+        if (!cart.length) {
+            cartItems.innerHTML = `
+                <div class="cart-empty">
+                    <div class="cart-empty-icon">🛒</div>
+                    <div class="cart-empty-text">السلة فاضية — أضف أصناف من المنيو</div>
+                </div>`;
+        } else {
+            cartItems.innerHTML = cart.map((item, index) => `
                 <div class="cart-item">
                     <div class="cart-item-info">
-                        <strong>${item.name}</strong>
-                        <small>(${item.variant})</small>
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-variant">${item.variant}</div>
+                        <div class="cart-item-price">${item.price * item.qty} ج</div>
                     </div>
-                    <div class="cart-item-price">
-                        <div style="display:flex;align-items:center;gap:6px">
-                            <button onclick="decreaseQty(${index})" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700">−</button>
-                            <span style="font-weight:700;min-width:18px;text-align:center">${item.qty}</span>
-                            <button onclick="increaseQty(${index})" style="background:rgba(255,106,26,0.4);border:none;color:#fff;width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700">+</button>
-                        </div>
-                        <span>${item.price * item.qty}ج</span>
-                        <i class="fas fa-trash-alt" onclick="removeFromCart(${index})"></i>
+                    <div class="cart-qty">
+                        <button class="qty-btn" onclick="decreaseQty(${index})">−</button>
+                        <span class="qty-num">${item.qty}</span>
+                        <button class="qty-btn" onclick="increaseQty(${index})">+</button>
                     </div>
-                </div>
-            `;
-        });
+                    <button class="cart-del-btn" onclick="removeFromCart(${index})">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                    </button>
+                </div>`).join('');
+        }
 
-        cartCount.innerText = totalQty;
-        cartTotal.innerText = total;
+        if (cartTotal)    cartTotal.textContent    = total;
+        if (cartBadge)    cartBadge.textContent    = totalQty;
+        if (cartTopCount) cartTopCount.textContent = totalQty + ' صنف';
 
         const trigger = document.getElementById('cartTrigger');
         trigger.classList.add('bump');
@@ -146,11 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.decreaseQty = function(index) {
-        if (cart[index].qty > 1) {
-            cart[index].qty--;
-        } else {
-            cart.splice(index, 1);
-        }
+        if (cart[index].qty > 1) { cart[index].qty--; }
+        else { cart.splice(index, 1); }
         updateCartUI();
     };
 
@@ -160,22 +161,37 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.toggleCart = function() {
-        document.getElementById('cartModal').classList.toggle('active');
+        const drawer  = document.getElementById('cartModal');
+        const overlay = document.querySelector('.cart-overlay');
+        drawer.classList.toggle('active');
+        overlay.classList.toggle('open');
     };
     window.sendOrder = function() {
         if (cart.length === 0) {
             alert("السلة فارغة، أضف بعض الأصناف أولاً!");
             return;
         }
-        
+
+        const address = document.getElementById('customerAddress')?.value.trim();
+        const notes   = document.getElementById('customerNotes')?.value.trim();
+
+        if (!address) {
+            alert("من فضلك اكتب عنوانك عشان نوصّلك الطلب!");
+            document.getElementById('customerAddress')?.focus();
+            return;
+        }
+
         let message = "طلب جديد من *سفروت* 🌯\n\n";
+        message += "🛒 *الطلب:*\n";
         cart.forEach((item, i) => {
             message += `${i+1}. *${item.name}* (${item.variant})`;
             if (item.qty > 1) message += ` × ${item.qty}`;
             message += ` - ${item.price * item.qty}ج\n`;
         });
         message += `\n💰 *الإجمالي:* ${document.getElementById('cartTotal').innerText} جنيه`;
-        
+        message += `\n\n🏠 *العنوان:* ${address}`;
+        if (notes) message += `\n📝 *ملاحظات:* ${notes}`;
+
         const encodedMsg = encodeURIComponent(message);
         window.open(`https://api.whatsapp.com/send?phone=+201063441939&text=${encodedMsg}`);
     };
