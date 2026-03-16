@@ -47,26 +47,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. نظام السلة
     let cart = [];
 
-    // وظيفة فتح المودال للخيارات (أحجام أو أنواع)
+    // وظيفة فتح المودال للخيارات (أحجام أو أنواع) — مربعات اختيار
     window.openOptionsModal = function(name, prices, options) {
         const modal = document.getElementById('sizeModal');
         const optionsDiv = document.getElementById('sizeOptions');
         document.getElementById('modalItemName').innerText = name;
-        
-        const priceArr = prices.split(',');
-        const optArr = options.split(',');
 
-        optionsDiv.innerHTML = ''; 
-        
+        const priceArr = prices.split(',');
+        const optArr   = options.split(',');
+
+        optionsDiv.innerHTML = '';
+
         optArr.forEach((opt, index) => {
-            // استخدام السعر المقابل للخيار أو أول سعر لو مفيش غيره
             const currentPrice = priceArr[index] ? priceArr[index].trim() : priceArr[0].trim();
-            
-            const btn = document.createElement('button');
-            btn.className = 'size-option-btn';
-            btn.innerHTML = `<span>${opt}</span> <span>${currentPrice}ج</span>`;
-            btn.onclick = () => addToCart(name, opt, currentPrice);
-            optionsDiv.appendChild(btn);
+
+            const card = document.createElement('div');
+            card.className = 'choice-card';
+            card.innerHTML = `
+                <span class="choice-label">${opt.trim()}</span>
+                <span class="choice-price">${currentPrice}ج</span>
+            `;
+            card.onclick = () => {
+                document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                // بعد ثانية بسيطة يضيفه للسلة
+                setTimeout(() => addToCart(name, opt.trim(), currentPrice), 200);
+            };
+            optionsDiv.appendChild(card);
         });
 
         modal.style.display = 'flex';
@@ -81,9 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sizeModal').style.display = 'none';
     };
 
-    // إضافة للسلة
+    // إضافة للسلة — بيزود الكمية لو الصنف موجود
     window.addToCart = function(name, variant, price) {
-        cart.push({ name, variant, price: parseInt(price) });
+        const existing = cart.find(i => i.name === name && i.variant === variant);
+        if (existing) {
+            existing.qty++;
+        } else {
+            cart.push({ name, variant, price: parseInt(price), qty: 1 });
+        }
         updateCartUI();
         closeModal();
     };
@@ -93,12 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const cartItems = document.getElementById('cartItems');
         const cartCount = document.getElementById('cartCount');
         const cartTotal = document.getElementById('cartTotal');
-        
+
         cartItems.innerHTML = '';
         let total = 0;
+        let totalQty = 0;
 
         cart.forEach((item, index) => {
-            total += item.price;
+            total    += item.price * item.qty;
+            totalQty += item.qty;
             cartItems.innerHTML += `
                 <div class="cart-item">
                     <div class="cart-item-info">
@@ -106,20 +120,39 @@ document.addEventListener('DOMContentLoaded', () => {
                         <small>(${item.variant})</small>
                     </div>
                     <div class="cart-item-price">
-                        <span>${item.price}ج</span>
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <button onclick="decreaseQty(${index})" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700">−</button>
+                            <span style="font-weight:700;min-width:18px;text-align:center">${item.qty}</span>
+                            <button onclick="increaseQty(${index})" style="background:rgba(255,106,26,0.4);border:none;color:#fff;width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700">+</button>
+                        </div>
+                        <span>${item.price * item.qty}ج</span>
                         <i class="fas fa-trash-alt" onclick="removeFromCart(${index})"></i>
                     </div>
                 </div>
             `;
         });
 
-        cartCount.innerText = cart.length;
+        cartCount.innerText = totalQty;
         cartTotal.innerText = total;
 
         const trigger = document.getElementById('cartTrigger');
         trigger.classList.add('bump');
         setTimeout(() => trigger.classList.remove('bump'), 300);
     }
+
+    window.increaseQty = function(index) {
+        cart[index].qty++;
+        updateCartUI();
+    };
+
+    window.decreaseQty = function(index) {
+        if (cart[index].qty > 1) {
+            cart[index].qty--;
+        } else {
+            cart.splice(index, 1);
+        }
+        updateCartUI();
+    };
 
     window.removeFromCart = function(index) {
         cart.splice(index, 1);
@@ -137,7 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let message = "طلب جديد من *سفروت* 🌯\n\n";
         cart.forEach((item, i) => {
-            message += `${i+1}. *${item.name}* (${item.variant}) - ${item.price}ج\n`;
+            message += `${i+1}. *${item.name}* (${item.variant})`;
+            if (item.qty > 1) message += ` × ${item.qty}`;
+            message += ` - ${item.price * item.qty}ج\n`;
         });
         message += `\n💰 *الإجمالي:* ${document.getElementById('cartTotal').innerText} جنيه`;
         

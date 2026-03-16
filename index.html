@@ -10,12 +10,60 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff6b00">
     <link rel="apple-touch-icon" href="safrot.png">
+
+    <!-- Firebase SDK v12 compat -->
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+    <style>
+        #offersSection { padding: 0.8rem 1rem 0; max-width: 700px; margin: 0 auto; }
+        .offer-banner {
+            background: linear-gradient(135deg, rgba(255,106,26,0.15), rgba(255,60,0,0.08));
+            border: 1px solid rgba(255,106,26,0.35);
+            border-radius: 14px;
+            padding: 0.9rem 1.1rem;
+            margin-bottom: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            animation: offerPop .4s ease;
+        }
+        @keyframes offerPop { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+        .offer-banner-body  { flex: 1; min-width: 0; }
+        .offer-banner-title { font-weight: 900; color: #ff6a1a; font-size: 1rem; margin-bottom: 0.2rem; }
+        .offer-banner-desc  { font-size: 0.87rem; color: rgba(240,235,229,0.7); line-height: 1.4; }
+        .offer-banner-price { font-size: 0.9rem; font-weight: 900; color: #ff6a1a; margin-top: 0.2rem; }
+        .offer-add-btn {
+            background: linear-gradient(135deg, #ff6a1a, #e04e00);
+            color: white; border: none; border-radius: 10px;
+            padding: 9px 16px; font-size: 1rem; font-weight: 700;
+            font-family: 'Cairo', sans-serif; cursor: pointer;
+            white-space: nowrap; flex-shrink: 0;
+            box-shadow: 0 3px 12px rgba(255,106,26,0.4);
+            transition: opacity .2s, transform .1s;
+        }
+        .offer-add-btn:hover  { opacity: 0.9; }
+        .offer-add-btn:active { transform: scale(0.96); }
+
+        /* مربعات الاختيار */
+        .choice-card {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 16px; margin: 7px 0;
+            border: 1.5px solid rgba(255,106,26,0.25); border-radius: 12px;
+            background: rgba(255,255,255,0.04); cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .choice-card:hover   { border-color: rgba(255,106,26,0.6); background: rgba(255,106,26,0.08); }
+        .choice-card.selected { border-color: #ff6a1a; background: rgba(255,106,26,0.18); transform: scale(1.02); }
+        .choice-label { font-family:'Cairo',sans-serif; font-weight:700; font-size:1rem; color:#f0ebe5; }
+        .choice-price { font-family:'Cairo',sans-serif; font-weight:900; font-size:.95rem; color:#ff6a1a; background:rgba(255,106,26,0.12); padding:3px 10px; border-radius:20px; }
+    </style>
 </head>
 <body>
 
     <header>
         <div class="logo-wrapper">
-            <div class="image-box">
+            <div class="image-box" id="logoBox">
                 <img src="safrot.png" alt="سفروت" onerror="this.style.display='none'">
             </div>
         </div>
@@ -26,96 +74,17 @@
         </div>
     </header>
 
-    <div class="container">
-    
-        <button class="accordion">ساندوتشات المزاج (فرايد & برجر) 🍔<span>+</span></button>
-        <div class="panel">
-            <div class="item" onclick="openOptionsModal('فرايد تشيكن (سفروت)', '65,100,135', 'سنجل,دبل,تريبل')">
-                <div class="item-info"><span>فرايد تشيكن (سفروت)</span><p>خس، طماطم، فلفل، كاتشب، مايونيز</p></div>
-                <div class="price-section"><span class="price">65 | 100 | 135ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
-            </div>
-            <div class="item" onclick="openOptionsModal('زنجر (سبايسي)', '65,100,135', 'سنجل,دبل,تريبل')">
-                <div class="item-info"><span>زنجر (سبايسي)</span><p>قطع زنجر حارة مع صوصات سفروت</p></div>
-                <div class="price-section"><span class="price">65 | 100 | 135ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
-            </div>
-            <div class="item" onclick="openOptionsModal('برجر كلاسيك', '60,95,135', 'سنجل,دبل,تريبل')">
-                <div class="item-info"><span>برجر كلاسيك</span><p>برجر لحم صافي مع صوص تيستي</p></div>
-                <div class="price-section"><span class="price">60 | 95 | 135ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
-            </div>
-            <div class="item" onclick="openOptionsModal('برجر المزاج', '75,110,145', 'سنجل,دبل,تريبل')">
-                <div class="item-info"><span>برجر المزاج</span><p>برجر + تركي مدخن + صوص شيدر</p></div>
-                <div class="price-section"><span class="price">75 | 110 | 145ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
-            </div>
-            <div class="item" onclick="addToCart('ساندوتش الصاروخ', 'جامبو', 80)">
-                <div class="item-info"><span>ساندوتش الصاروخ</span><p>فرايد + أصابع جبنة + تركي + شيدر</p></div>
-                <div class="price-section"><span class="price">80ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
-            </div>
-        </div>
+    <!-- العروض — بتظهر لو فيه عروض فعّالة -->
+    <div id="offersSection" style="display:none">
+        <div id="offersContainer"></div>
+    </div>
 
-        <button class="accordion">كريبات الفراخ 🌯<span>+</span></button>
-        <div class="panel">
-            <div class="item" onclick="addToCart('كريب شاورما فراخ', 'جريل', 85)"><span>كريب شاورما فراخ (جريل)</span><div class="price-section"><span class="price">85ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب فرايد تشيكن', 'مقرمش', 90)"><span>كريب فرايد تشيكن (مقرمش)</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب زنجر', 'حار نار', 90)"><span>كريب زنجر (حار نار)</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب بانية ناجتس', 'عادي', 65)"><span>كريب بانية ناجتس</span><div class="price-section"><span class="price">65ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب كوردن بلو', 'عادي', 95)"><span>كريب كوردن بلو</span><div class="price-section"><span class="price">95ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب برجر فراخ', 'عادي', 90)"><span>كريب برجر فراخ</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="openOptionsModal('كريب فاهيتا أو شيش', '95', 'فاهيتا,شيش طاووق')"><span>كريب فاهيتا / شيش طاووق</span><div class="price-section"><span class="price">95ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+    <!-- المنيو هيتحمل من Firebase أوتوماتيك -->
+    <div class="container" id="menuContainer">
+        <div style="text-align:center; padding:2rem; color:#aaa;">
+            <div style="font-size:2rem;">⏳</div>
+            <p>جاري تحميل المنيو...</p>
         </div>
-
-        <button class="accordion">كريبات اللحوم 🥩<span>+</span></button>
-        <div class="panel">
-            <div class="item" onclick="addToCart('كريب هوت دوج', 'سوسيس', 80)"><span>كريب هوت دوج (سوسيس)</span><div class="price-section"><span class="price">80ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب سجق شرقي', 'عادي', 85)"><span>كريب سجق شرقي</span><div class="price-section"><span class="price">85ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب كفتة مشوية', 'عادي', 85)"><span>كريب كفتة مشوية</span><div class="price-section"><span class="price">85ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب برجر لحم', 'عادي', 90)"><span>كريب برجر لحم</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب لحمة مفرومة', 'عادي', 80)"><span>كريب لحمة مفرومة</span><div class="price-section"><span class="price">80ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب ميكس لحوم', 'سوبر', 110)"><span>كريب ميكس لحوم (سوبر)</span><div class="price-section"><span class="price">110ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-        </div>
-
-        <button class="accordion">ميكسات سفروت المخصوصة ⚡<span>+</span></button>
-        <div class="panel">
-            <div class="item" onclick="addToCart('ميكس دويتو', 'فرايد+بانية', 90)"><span>ميكس دويتو (فرايد + بانية)</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="openOptionsModal('ميكس سوبر', '110', 'فرايد+هوت دوج,زنجر+هوت دوج')"><span>ميكس سوبر (فرايد/زنجر + هوت دوج)</span><div class="price-section"><span class="price">110ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('ميكس العناية', 'فرايد+شاورما+هوت دوج', 115)"><span>ميكس العناية (فرايد + شاورما + هوت دوج)</span><div class="price-section"><span class="price">115ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('ميكس الوحش', 'كوردن+هوت دوج+تركي', 120)"><span>ميكس الوحش (كوردن + هوت دوج + تركي)</span><div class="price-section"><span class="price">120ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('ميكس الباشا', 'برجر+سجق+هوت دوج', 125)"><span>ميكس الباشا (برجر + سجق + هوت دوج)</span><div class="price-section"><span class="price">125ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('ميكس سفروت', 'تشكيلة كاملة', 135)"><span>ميكس سفروت (تشكيلة فراخ كاملة)</span><div class="price-section"><span class="price">135ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-        </div>
-
-        <button class="accordion">ساندوتشات الفينو والكيزر 🥖<span>+</span></button>
-        <div class="panel">
-            <div class="item" onclick="openOptionsModal('شاورما أو بانية (فينو)', '25,45', 'شاورما فراخ صغير,شاورما فراخ كبير,بانية صغير,بانية كبير')"><span>شاورما فراخ / بانية</span><div class="price-section"><span class="price">25 | 45ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="openOptionsModal('هوت دوج أو سجق (فينو)', '25,45', 'هوت دوج صغير,هوت دوج كبير,سجق صغير,سجق كبير')"><span>هوت دوج / سجق شرقي</span><div class="price-section"><span class="price">25 | 45ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="openOptionsModal('كفتة أو برجر (فينو)', '25,45', 'كفتة صغير,كفتة كبير,برجر صغير,برجر كبير')"><span>كفتة / برجر لحم</span><div class="price-section"><span class="price">25 | 45ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="openOptionsModal('بطاطس (فينو)', '15,25', 'صغير,كبير')"><span>بطاطس (فينو)</span><div class="price-section"><span class="price">15 | 25ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-        </div>
-
-        <button class="accordion">كريبات البطاطس والجبن 🍟<span>+</span></button>
-        <div class="panel">
-            <div class="item" onclick="addToCart('كريب بطاطس', 'عادي', 50)"><span>كريب بطاطس</span><div class="price-section"><span class="price">50ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب بطاطس موزاريلا', 'عادي', 60)"><span>كريب بطاطس موزاريلا</span><div class="price-section"><span class="price">60ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب ميكس جبن', 'رومي+موزاريلا+شيدر', 60)"><span>كريب ميكس جبن (رومي/موزاريلا/شيدر)</span><div class="price-section"><span class="price">60ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب بطاطس ميكس جبن', 'ميكس', 70)"><span>كريب بطاطس ميكس جبن</span><div class="price-section"><span class="price">70ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-        </div>
-
-        <button class="accordion">كريبات الحلو 🍫<span>+</span></button>
-        <div class="panel">
-            <div class="item" onclick="addToCart('كريب نوتيلا', 'عادي', 50)"><span>كريب نوتيلا</span><div class="price-section"><span class="price">50ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب لوتس', 'عادي', 55)"><span>كريب لوتس</span><div class="price-section"><span class="price">55ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب نوتيلا بالموز', 'عادي', 60)"><span>كريب نوتيلا بالموز</span><div class="price-section"><span class="price">60ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب نوتيلا فواكه', 'عادي', 65)"><span>كريب نوتيلا فواكه</span><div class="price-section"><span class="price">65ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('كريب ميكس دمار', 'نوتيلا+لوتس+أوريو', 75)"><span>كريب ميكس دمار (نوتيلا+لوتس+أوريو)</span><div class="price-section"><span class="price">75ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-        </div>
-
-        <button class="accordion">الإضافات والصوصات 🧂<span>+</span></button>
-        <div class="panel">
-            <div class="item" onclick="openOptionsModal('اختر الصوص', '10', 'كاتشب,مايونيز,ثومية')"><span>إضافة (كاتشب / مايونيز / ثومية)</span><div class="price-section"><span class="price">10ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="openOptionsModal('اختر الإضافة', '15', 'شيدر,هاليبينو,موزاريلا')"><span>إضافة (شيدر / هاليبينو / موزاريلا)</span><div class="price-section"><span class="price">15ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('أصابع جبنة', '3 قطع', 35)"><span>أصابع جبنة (3 قطع)</span><div class="price-section"><span class="price">35ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-            <div class="item" onclick="addToCart('بطاطس لغويص', 'طبق', 45)"><span>بطاطس لغويص (غرقانة صوصات)</span><div class="price-section"><span class="price">45ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
-        </div>
-
     </div>
 
     <div id="sizeModal" class="modal">
@@ -140,24 +109,220 @@
         <div id="cartItems"></div>
         <div class="cart-footer">
             <div class="total">الإجمالي: <span id="cartTotal">0</span> ج</div>
-            <button onclick="sendOrder()" class="order-btn">إتمام الطلب (واتساب) <i class="fab fa-whatsapp"></i></button>
+            <button onclick="sendOrder()" class="order-btn">إتمام الطلب 🛵</button>
         </div>
     </div>
 
     <footer>
         <div class="footer-info">
             <p>📍 العنوان: أسيوط - منفلوط - شارع العشرين - خلف موقف الحواتكة - بجوار ستوديو زووم</p>
-            <p>🕒 مواعيد العمل: من 1 ظهراً حتى 2 بعد منتصف الليل</p>
+            <p id="workHours"></p>
         </div>
         <div class="contact-buttons">
-            <a href="https://api.whatsapp.com/send?phone=+201063441939" target="_blank" class="wa-btn">
-                <i class="fab fa-whatsapp"></i> واتساب
-            </a>
             <a href="https://www.facebook.com/share/18PGB1cUcs/" target="_blank" class="fb-btn">
                 <i class="fab fa-facebook-f"></i> فيسبوك
             </a>
         </div>
     </footer>
+
+    <script>
+    // ============================================================
+    // 🔥 Firebase Config
+    // ============================================================
+    const firebaseConfig = {
+        apiKey:            "AIzaSyB9SPgS_LfMrcvTGjL4azXOIMtdR0WFhDc",
+        authDomain:        "safrot-72.firebaseapp.com",
+        databaseURL:       "https://safrot-72-default-rtdb.firebaseio.com",
+        projectId:         "safrot-72",
+        storageBucket:     "safrot-72.firebasestorage.app",
+        messagingSenderId: "13434525505",
+        appId:             "1:13434525505:web:ce09ae5c0a8f39afb0b3c0",
+        measurementId:     "G-3NDYYW3QEK"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const menuRef = firebase.database().ref('menu');
+
+    // ============================================================
+    // 🔑 السر: اضغط اللوجو 3 مرات تتحول لصفحة الأدمن
+    // ============================================================
+    let tapCount = 0, tapTimer;
+    document.getElementById('logoBox').addEventListener('click', () => {
+        tapCount++;
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => tapCount = 0, 2000);
+        if (tapCount >= 3) {
+            tapCount = 0;
+            window.location.href = 'admin.html';
+        }
+    });
+
+    // ============================================================
+    // 🍽️ تحميل المنيو من Firebase وعرضه
+    // ============================================================
+    function buildMenu(categories) {
+        const container = document.getElementById('menuContainer');
+        if (!categories || !categories.length) {
+            container.innerHTML = '<div style="text-align:center;padding:2rem;color:#aaa;">المنيو فاضي حالياً</div>';
+            return;
+        }
+
+        const sorted = [...categories].sort((a, b) => (a.ord || 0) - (b.ord || 0));
+        let html = '';
+
+        sorted.forEach(cat => {
+            const items = Array.isArray(cat.items)
+                ? cat.items
+                : cat.items ? Object.values(cat.items) : [];
+            const sortedItems = [...items].sort((a, b) => (a.ord || 0) - (b.ord || 0));
+
+            html += `<button class="accordion">${cat.emoji || ''} ${cat.name}<span>+</span></button>`;
+            html += `<div class="panel">`;
+
+            sortedItems.forEach(item => {
+                const priceText = item.price || '';
+                const onclick   = buildOnclick(item.name, priceText);
+                const descHtml  = item.desc ? `<p>${item.desc}</p>` : '';
+
+                html += `
+                    <div class="item" onclick="${onclick}">
+                        <div class="item-info">
+                            <span>${item.name}</span>
+                            ${descHtml}
+                        </div>
+                        <div class="price-section">
+                            <span class="price">${priceText}</span>
+                            <button class="add-btn"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>`;
+            });
+
+            html += `</div>`;
+        });
+
+        container.innerHTML = html;
+
+        // إعادة تفعيل الـ accordion — بيقفل الباقيين لما تفتح واحد
+        document.querySelectorAll('.accordion').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const isOpen = !!this.nextElementSibling.style.maxHeight;
+
+                // اقفل كل الأقسام الأول
+                document.querySelectorAll('.accordion').forEach(other => {
+                    other.classList.remove('active');
+                    other.nextElementSibling.style.maxHeight = null;
+                    const s = other.querySelector('span');
+                    if (s) s.textContent = '+';
+                });
+
+                // لو الضغطة على قسم مقفول، افتحه
+                if (!isOpen) {
+                    this.classList.add('active');
+                    this.nextElementSibling.style.maxHeight = this.nextElementSibling.scrollHeight + 'px';
+                    const span = this.querySelector('span');
+                    if (span) span.textContent = '−';
+                }
+            });
+        });
+    }
+
+    // بيحوّل الصنف لـ onclick مناسب — بيكتشف الـ / أوتوماتيك
+    function buildOnclick(name, priceText) {
+        const nums     = priceText.match(/\d+/g);
+        const safeName = name.replace(/'/g, "\\'");
+
+        // استخرج الخيارات من الـ /
+        // شيل محتوى الأقواس زي (رومي/موزاريلا/شيدر) أو اشتغل على الاسم كله
+        const parenMatch = name.match(/\(([^)]+\/[^)]+)\)/);
+        const slashSource = parenMatch ? parenMatch[1] : name;
+        const hasSlash    = slashSource.includes('/');
+
+        if (hasSlash) {
+            // استخرج الخيارات من الـ /
+            const rawParts = slashSource.split('/').map(p => p.trim()).filter(Boolean);
+
+            if (!nums || nums.length === 1) {
+                // سعر واحد — الخيارات هي أجزاء الـ /
+                const price   = nums ? nums[0] : 0;
+                const prices  = rawParts.map(() => price).join(',');
+                const options = rawParts.join(',');
+                return `openOptionsModal('${safeName}', '${prices}', '${options}')`;
+            } else {
+                // أكتر من سعر — اعمل combinations (نوع × حجم)
+                const sizes   = nums.length === 2 ? ['صغير','كبير'] : nums.map((_,i) => `حجم ${i+1}`);
+                const combos  = [];
+                const prices  = [];
+                rawParts.forEach(part => {
+                    sizes.forEach((size, si) => {
+                        combos.push(`${part} ${size}`);
+                        prices.push(nums[si]);
+                    });
+                });
+                return `openOptionsModal('${safeName}', '${prices.join(',')}', '${combos.join(',')}')`;
+            }
+        }
+
+        // مفيش / — الـ logic القديمة
+        if (!nums || nums.length === 1) {
+            const price = nums ? nums[0] : 0;
+            return `addToCart('${safeName}', 'عادي', ${price})`;
+        }
+        const prices = nums.join(',');
+        const sizeLabels = { 2:'صغير,كبير', 3:'سنجل,دبل,تريبل', 4:'صغير,وسط,كبير,إكسترا' };
+        const sizes = sizeLabels[nums.length] || nums.map((_,i) => `خيار ${i+1}`).join(',');
+        return `openOptionsModal('${safeName}', '${prices}', '${sizes}')`;
+    }
+
+    // تحميل مواعيد العمل من Firebase
+    firebase.database().ref('settings/hours').on('value', snap => {
+        const v = snap.val();
+        if (!v) return;
+        const fmt = t => {
+            const [h, m] = t.split(':').map(Number);
+            const mm = m ? ':' + String(m).padStart(2,'0') : '';
+            if (h === 0)  return '12' + mm + ' صباحاً';
+            if (h < 12)   return h + mm + ' صباحاً';
+            if (h === 12) return '12' + mm + ' ظهراً';
+            return (h - 12) + mm + ' مساءً';
+        };
+        // فترتين
+        if (v.shift1Open && v.shift2Open) {
+            document.getElementById('workHours').textContent =
+                '🕒 من ' + fmt(v.shift1Open) + ' لـ ' + fmt(v.shift1Close) +
+                '  •  من ' + fmt(v.shift2Open) + ' لـ ' + fmt(v.shift2Close);
+        } else if (v.open) {
+            document.getElementById('workHours').textContent =
+                '🕒 مواعيد العمل: من ' + fmt(v.open) + ' حتى ' + fmt(v.close);
+        }
+    });
+
+    // تحميل العروض
+    firebase.database().ref('offers').on('value', snap => {
+        const val = snap.val() || {};
+        const active = Object.values(val).filter(o => o.active);
+        const section = document.getElementById('offersSection');
+        const container = document.getElementById('offersContainer');
+        if (!active.length) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+        container.innerHTML = active.map(o => `
+            <div class="offer-banner">
+                <div class="offer-banner-body">
+                    <div class="offer-banner-title">🔥 ${o.title}</div>
+                    ${o.desc  ? `<div class="offer-banner-desc">${o.desc}</div>`   : ''}
+                    ${o.price ? `<div class="offer-banner-price">${o.price}ج</div>` : ''}
+                </div>
+                ${o.price ? `<button class="offer-add-btn" onclick="addToCart('${o.title.replace(/'/g,"\\'")}', 'عرض', ${parseInt(o.price)||0})">+ أضف</button>` : ''}
+            </div>`).join('');
+    });
+
+    // تحميل البيانات
+    menuRef.on('value', snap => {
+        const val = snap.val();
+        if (!val) { buildMenu([]); return; }
+        const arr = Array.isArray(val) ? val : Object.values(val);
+        buildMenu(arr);
+    });
+    </script>
 
     <script src="script.js?v=2"></script>
 </body>

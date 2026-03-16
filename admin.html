@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم - سفروت 🔥</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --orange:       #ff6a1a;
+            --orange-dark:  #e04e00;
+            --orange-glow:  rgba(255,106,26,0.35);
+            --green:        #00e676;
+            --red:          #ff1744;
+            --bg:           #0d0d0d;
+            --surface:      rgba(255,255,255,0.05);
+            --surface-2:    rgba(255,255,255,0.09);
+            --text:         #f0ebe5;
+            --muted:        rgba(240,235,229,0.45);
+            --border:       rgba(255,106,26,0.2);
+            --border-hover: rgba(255,106,26,0.55);
+            --glass:        rgba(20,20,20,0.6);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg); color: var(--text); min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(255,106,26,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 80%, rgba(255,60,0,0.08) 0%, transparent 55%);
+        }
+
+        /* LOGIN */
+        #loginScreen {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 1rem;
+            background: radial-gradient(ellipse at 30% 30%, rgba(255,106,26,0.25) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 75%, rgba(180,40,0,0.18) 0%, transparent 55%), #0d0d0d;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.06); backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,106,26,0.3); border-radius: 24px;
+            padding: 2.5rem 2rem; width: 100%; max-width: 360px; text-align: center;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+        }
+        .login-logo { margin-bottom: 0.5rem; }
+        .login-logo img { width: 100px; height: 100px; object-fit: contain; border-radius: 20px; filter: drop-shadow(0 0 18px rgba(255,106,26,0.6)); }
+        .login-card h2 { font-size: 1.8rem; font-weight: 900; color: var(--orange); margin-bottom: 0.3rem; text-shadow: 0 0 20px var(--orange-glow); }
+        .login-card p  { color: var(--muted); margin-bottom: 2rem; font-size: 0.95rem; }
+        .input-wrap { margin-bottom: 1rem; }
+        .input-wrap input {
+            width: 100%; padding: 14px 18px; border: 1.5px solid var(--border); border-radius: 12px;
+            font-size: 1rem; font-family: 'Cairo', sans-serif; text-align: center; letter-spacing: 3px;
+            background: rgba(255,255,255,0.05); color: var(--text); transition: border-color .2s;
+        }
+        .input-wrap input::placeholder { color: var(--muted); letter-spacing: 1px; }
+        .input-wrap input:focus { outline: none; border-color: var(--orange); background: rgba(255,106,26,0.07); box-shadow: 0 0 0 3px rgba(255,106,26,0.15); }
+        .btn-login {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+            color: white; border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: 700; font-family: 'Cairo', sans-serif;
+            cursor: pointer; box-shadow: 0 4px 20px rgba(255,106,26,0.4); transition: opacity .2s, transform .1s;
+        }
+        .btn-login:hover { opacity: 0.9; }
+        .btn-login:active { transform: scale(0.98); }
+        .error-msg { color: #ff6b6b; font-size: 0.9rem; margin-top: 0.7rem; display: none; }
+
+        /* DASHBOARD */
+        #dashboard { display: none; }
+        .topbar {
+            background: rgba(15,15,15,0.85); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.9rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .topbar-title { font-size: 1.2rem; font-weight: 900; color: var(--orange); text-shadow: 0 0 16px var(--orange-glow); }
+        .btn-logout { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid rgba(255,255,255,0.12); padding: 7px 16px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.9rem; font-weight: 600; transition: all .2s; }
+        .btn-logout:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+        /* TABS */
+        .tabs { display: flex; background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border); padding: 0 1rem; }
+        .tab-btn { padding: 0.85rem 1.2rem; background: none; border: none; color: var(--muted); cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.95rem; font-weight: 700; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s, border-color .2s; }
+        .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+        .tab-btn:hover  { color: var(--text); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .content { padding: 1.5rem; max-width: 760px; margin: 0 auto; }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem; margin-bottom: 1rem; }
+        @media(max-width:500px){ .stats-grid { grid-template-columns: repeat(2,1fr); } }
+        .stat-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 16px; padding: 1.1rem 0.8rem; text-align: center; transition: border-color .2s, transform .2s; }
+        .stat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+        .stat-icon  { font-size: 1.6rem; margin-bottom: 0.4rem; }
+        .stat-value { font-size: 1.7rem; font-weight: 900; color: var(--orange); line-height:1; text-shadow: 0 0 14px var(--orange-glow); }
+        .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; font-weight: 600; }
+
+        /* BAR CHART */
+        .chart-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem; margin-bottom: 1.2rem; }
+        .chart-title { font-size: 0.9rem; font-weight: 700; color: var(--muted); margin-bottom: 1rem; }
+        .bar-chart { display: flex; flex-direction: column; gap: 0.6rem; }
+        .bar-row   { display: flex; align-items: center; gap: 0.7rem; }
+        .bar-label { font-size: 0.78rem; color: var(--muted); width: 130px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .bar-wrap  { flex: 1; background: rgba(255,255,255,0.06); border-radius: 6px; height: 22px; overflow: hidden; }
+        .bar-fill  { height: 100%; background: linear-gradient(90deg, var(--orange-dark), var(--orange)); border-radius: 6px; transition: width .6s ease; display: flex; align-items: center; justify-content: flex-end; }
+        .bar-num   { font-size: 0.72rem; font-weight: 700; color: white; padding: 0 6px; white-space: nowrap; }
+
+        /* TOP ORDERS */
+        .section-title { font-size: 0.95rem; font-weight: 900; color: var(--text); margin-bottom: 0.8rem; }
+        .orders-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.2rem; }
+        .order-row { background: var(--surface); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 0.7rem 0.9rem; display: flex; align-items: center; gap: 0.8rem; }
+        .order-rank  { font-size: 1.1rem; width: 24px; text-align: center; flex-shrink: 0; }
+        .order-name  { flex: 1; font-size: 0.9rem; font-weight: 700; color: var(--text); }
+        .order-count { font-size: 0.85rem; font-weight: 900; color: var(--orange); background: rgba(255,106,26,0.12); padding: 3px 10px; border-radius: 20px; min-width: 55px; text-align: center; }
+        .btn-order-reset { background: rgba(255,23,68,0.1); color: #ff6b6b; border: 1px solid rgba(255,23,68,0.2); padding: 5px 10px; border-radius: 7px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.75rem; transition: all .2s; }
+        .btn-order-reset:hover { background: rgba(255,23,68,0.2); }
+
+        /* PEAK HOURS */
+        .hours-chart { display: flex; align-items: flex-end; gap: 3px; height: 80px; margin: 0.5rem 0 0.3rem; }
+        .hour-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
+        .hour-bar { width: 100%; background: linear-gradient(180deg, var(--orange), var(--orange-dark)); border-radius: 3px 3px 0 0; transition: height .5s ease; }
+        .hour-bar.peak { background: linear-gradient(180deg, #ffdd57, var(--orange)); }
+        .hour-label { font-size: 0.6rem; color: var(--muted); }
+        .hours-note { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 0.4rem; }
+
+        /* MENU */
+        .top-actions { margin-bottom: 1.5rem; }
+        .btn-add-cat { background: linear-gradient(135deg, var(--orange), var(--orange-dark)); color: white; border: none; padding: 11px 22px; border-radius: 10px; font-size: 1rem; font-weight: 700; font-family: 'Cairo', sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 16px rgba(255,106,26,0.35); transition: opacity .2s, transform .1s; }
+        .btn-add-cat:hover { opacity: 0.9; }
+        .btn-add-cat:active { transform: scale(0.98); }
+        .cat-card { background: var(--glass); backdrop-filter: blur(16px); border-radius: 16px; margin-bottom: 1.2rem; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.3); transition: border-color .2s; }
+        .cat-card:hover { border-color: var(--border-hover); }
+        .cat-header { background: rgba(255,106,26,0.1); padding: 0.9rem 1.2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,106,26,0.25); }
+        .cat-name { font-weight: 900; color: var(--orange); font-size: 1.05rem; text-shadow: 0 0 12px var(--orange-glow); }
+        .cat-actions { display: flex; gap: 0.5rem; }
+        .item-list { padding: 0.7rem; }
+        .item-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0.8rem; border-radius: 10px; margin-bottom: 0.4rem; background: var(--surface); border: 1px solid rgba(255,255,255,0.06); transition: border-color .2s, background .2s; }
+        .item-row:hover { border-color: var(--border-hover); background: var(--surface-2); }
+        .item-info  { flex: 1; min-width: 0; }
+        .item-name  { font-weight: 700; color: var(--text); font-size: 0.97rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-desc  { font-size: 0.82rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-price { color: var(--orange); font-weight: 700; font-size: 0.95rem; margin-top: 3px; }
+        .item-actions { display: flex; gap: 0.4rem; margin-right: 0.8rem; flex-shrink: 0; }
+        .btn-edit { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); padding: 6px 10px; border-radius: 7px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.82rem; font-weight: 600; transition: all .2s; }
+        .btn-edit:hover { background: rgba(0,230,118,0.25); }
+        .btn-del  { background: rgba(255,23,68,0.12); color: #ff6b6b; border: 1px solid rgba(255,23,68,0.3); padding: 6px 10px; border-radius: 7px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.82rem; font-weight: 600; transition: all .2s; }
+        .btn-del:hover { background: rgba(255,23,68,0.22); }
+        .btn-log  { background: rgba(255,106,26,0.15); color: var(--orange); border: 1px solid rgba(255,106,26,0.3); padding: 6px 10px; border-radius: 7px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.82rem; font-weight: 700; transition: all .2s; }
+        .btn-log:hover { background: rgba(255,106,26,0.28); }
+        .btn-add-item { display: block; width: calc(100% - 1.4rem); margin: 0.5rem 0.7rem 0.7rem; padding: 9px; background: transparent; color: var(--orange); border: 1.5px dashed rgba(255,106,26,0.4); border-radius: 9px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.9rem; font-weight: 700; transition: all .2s; }
+        .btn-add-item:hover { border-color: var(--orange); background: rgba(255,106,26,0.08); }
+
+        /* SETTINGS */
+        .settings-section { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 16px; padding: 1.4rem; margin-bottom: 1.2rem; }
+        .settings-section h3 { font-size: 1rem; font-weight: 900; color: var(--orange); margin-bottom: 1.2rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-weight: 700; font-size: 0.88rem; color: var(--muted); margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 11px 14px; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.95rem; font-family: 'Cairo', sans-serif; background: rgba(255,255,255,0.05); color: var(--text); transition: border-color .2s; }
+        .form-group input::placeholder { color: var(--muted); }
+        .form-group input:focus { outline: none; border-color: var(--orange); background: rgba(255,106,26,0.07); box-shadow: 0 0 0 3px rgba(255,106,26,0.12); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .btn-save-setting { background: linear-gradient(135deg, var(--orange), var(--orange-dark)); color: white; border: none; padding: 11px 24px; border-radius: 10px; font-size: 0.95rem; font-weight: 700; font-family: 'Cairo', sans-serif; cursor: pointer; box-shadow: 0 4px 14px rgba(255,106,26,0.35); transition: opacity .2s; }
+        .btn-save-setting:hover { opacity: 0.9; }
+
+        /* MODAL */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(8px); }
+        .overlay.open { display: flex; }
+        .modal { background: rgba(18,18,18,0.92); backdrop-filter: blur(24px); border: 1px solid rgba(255,106,26,0.25); border-radius: 20px; padding: 1.8rem; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); animation: slideUp .25s ease; }
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .modal h3  { font-size: 1.3rem; font-weight: 900; color: var(--orange); margin-bottom: 1.4rem; text-shadow: 0 0 16px var(--orange-glow); }
+        .form-hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+        .modal-btns { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+        .btn-cancel { flex:1; padding:11px; background:rgba(255,255,255,0.05); color:var(--muted); border:1px solid rgba(255,255,255,0.1); border-radius:10px; cursor:pointer; font-family:'Cairo',sans-serif; font-size:1rem; font-weight:600; transition:all .2s; }
+        .btn-cancel:hover { background:rgba(255,255,255,0.09); color:var(--text); }
+        .btn-save { flex:2; padding:11px; background:linear-gradient(135deg,var(--orange),var(--orange-dark)); color:white; border:none; border-radius:10px; cursor:pointer; font-family:'Cairo',sans-serif; font-size:1rem; font-weight:700; box-shadow:0 4px 16px rgba(255,106,26,0.35); transition:opacity .2s; }
+        .btn-save:hover { opacity:0.9; }
+
+        /* STATES */
+        .loading-state,.empty-state { text-align:center; padding:2rem; color:var(--muted); font-size:.95rem; }
+        .loading-state .spinner { display:inline-block; width:30px; height:30px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin .7s linear infinite; margin-bottom:.7rem; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .items-empty { padding:.5rem .7rem 0; color:var(--muted); font-size:.85rem; text-align:center; }
+        .toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px); background:rgba(20,20,20,0.92); backdrop-filter:blur(12px); border:1px solid rgba(255,106,26,0.3); color:var(--text); padding:12px 24px; border-radius:30px; font-weight:700; font-size:.95rem; box-shadow:0 8px 30px rgba(0,0,0,.5); transition:transform .3s ease; z-index:999; white-space:nowrap; }
+        .toast.show { transform:translateX(-50%) translateY(0); }
+
+        /* OFFERS */
+        .offer-card { background:var(--surface); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:1rem 1.1rem; margin-bottom:.7rem; display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; transition:border-color .2s; }
+        .offer-card:hover { border-color:var(--border-hover); }
+        .offer-card.inactive { opacity:.45; }
+        .offer-body  { flex:1; min-width:0; }
+        .offer-title { font-weight:900; color:var(--orange); font-size:.97rem; margin-bottom:.25rem; }
+        .offer-desc  { font-size:.85rem; color:var(--muted); line-height:1.4; }
+        .offer-badge { font-size:.72rem; font-weight:700; padding:2px 9px; border-radius:20px; margin-top:.4rem; display:inline-block; }
+        .offer-badge.active   { background:rgba(0,230,118,0.15); color:var(--green); border:1px solid rgba(0,230,118,0.3); }
+        .offer-badge.inactive { background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid rgba(255,255,255,0.1); }
+        .offer-actions { display:flex; gap:.4rem; flex-shrink:0; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo"><img src="safrot.png" alt="سفروت" onerror="this.style.display='none'"></div>
+        <h2>سفروت</h2>
+        <p>لوحة التحكم</p>
+        <div class="input-wrap">
+            <input type="password" id="passInput" placeholder="ادخل الباسورد" onkeypress="if(event.key==='Enter') doLogin()">
+        </div>
+        <div class="error-msg" id="errMsg">❌ الباسورد غلط!</div>
+        <button class="btn-login" onclick="doLogin()">دخول</button>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+    <div class="topbar">
+        <div class="topbar-title">🍔 سفروت — لوحة التحكم</div>
+        <button class="btn-logout" onclick="doLogout()">خروج</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('menu',this)">📋 المنيو</button>
+        <button class="tab-btn"        onclick="switchTab('stats',this)">📊 إحصائيات</button>
+        <button class="tab-btn"        onclick="switchTab('offers',this)">🔥 العروض</button>
+        <button class="tab-btn"        onclick="switchTab('settings',this)">⚙️ إعدادات</button>
+    </div>
+
+    <!-- TAB: المنيو -->
+    <div class="tab-panel active" id="tab-menu">
+        <div class="content">
+            <div class="top-actions">
+                <button class="btn-add-cat" onclick="openCatModal()">+ إضافة قسم جديد</button>
+            </div>
+            <div id="menuWrap">
+                <div class="loading-state"><div class="spinner"></div><br>جاري التحميل...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: إحصائيات -->
+    <div class="tab-panel" id="tab-stats">
+        <div class="content">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-value" id="statCats">—</div><div class="stat-label">قسم</div></div>
+                <div class="stat-card"><div class="stat-icon">🍽️</div><div class="stat-value" id="statItems">—</div><div class="stat-label">صنف</div></div>
+                <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value" id="statMin">—</div><div class="stat-label">أقل سعر</div></div>
+                <div class="stat-card"><div class="stat-icon">👑</div><div class="stat-value" id="statMax">—</div><div class="stat-label">أعلى سعر</div></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">📈 عدد الأصناف في كل قسم</div>
+                <div class="bar-chart" id="catChart"></div>
+            </div>
+
+            <div class="section-title">🏆 أكتر الأصناف طلباً</div>
+            <div class="orders-list" id="ordersList">
+                <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">جاري التحميل...</div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">🕒 ساعات الذروة</div>
+                <div class="hours-chart" id="hoursChart"></div>
+                <div class="hours-note"  id="hoursNote">سجّل طلبات من تاب المنيو (+1) عشان تظهر البيانات هنا</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: العروض -->
+    <div class="tab-panel" id="tab-offers">
+        <div class="content">
+            <div class="settings-section">
+                <h3>🔥 إدارة العروض</h3>
+                <p style="color:var(--muted);font-size:.85rem;margin-bottom:1.2rem">العروض بتظهر في أعلى الموقع قبل المنيو — لو مفيش عروض مش هيظهر أي حاجة</p>
+
+                <div id="offersList" style="margin-bottom:1.2rem">
+                    <div class="loading-state"><div class="spinner"></div></div>
+                </div>
+
+                <button class="btn-add-cat" onclick="openOfferModal()">+ إضافة عرض جديد</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: إعدادات -->
+    <div class="tab-panel" id="tab-settings">
+        <div class="content">
+            <div class="settings-section">
+                <h3>🕐 مواعيد العمل</h3>
+                <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">المطعم بيفتح فترتين في اليوم</p>
+
+                <p style="color:var(--orange);font-size:.88rem;font-weight:700;margin-bottom:.6rem">🌤️ الفترة الأولى</p>
+                <div class="form-row">
+                    <div class="form-group"><label>الفتح</label><input type="time" id="shift1Open"  value="14:00"></div>
+                    <div class="form-group"><label>الغلق</label><input type="time" id="shift1Close" value="17:30"></div>
+                </div>
+
+                <p style="color:var(--orange);font-size:.88rem;font-weight:700;margin-bottom:.6rem;margin-top:.4rem">🌙 الفترة الثانية</p>
+                <div class="form-row">
+                    <div class="form-group"><label>الفتح</label><input type="time" id="shift2Open"  value="20:00"></div>
+                    <div class="form-group"><label>الغلق</label><input type="time" id="shift2Close" value="02:00"></div>
+                </div>
+
+                <button class="btn-save-setting" onclick="saveHours()">💾 حفظ المواعيد</button>
+            </div>
+
+            <div class="settings-section">
+                <h3>🔑 تغيير الباسورد</h3>
+                <div class="form-group"><label>الباسورد الحالي</label><input type="password" id="oldPass" placeholder="••••••••"></div>
+                <div class="form-group"><label>الباسورد الجديد</label><input type="password" id="newPass" placeholder="••••••••"></div>
+                <div class="form-group"><label>تأكيد الباسورد الجديد</label><input type="password" id="confirmPass" placeholder="••••••••"></div>
+                <button class="btn-save-setting" onclick="changePass()">🔐 تغيير الباسورد</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+    <div class="modal">
+        <h3 id="modalTitle"></h3>
+        <div id="modalBody"></div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+            <button class="btn-save"   onclick="doSave()">حفظ ✓</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// Firebase
+// ============================================================
+const firebaseConfig = {
+    apiKey:"AIzaSyB9SPgS_LfMrcvTGjL4azXOIMtdR0WFhDc",
+    authDomain:"safrot-72.firebaseapp.com",
+    databaseURL:"https://safrot-72-default-rtdb.firebaseio.com",
+    projectId:"safrot-72",
+    storageBucket:"safrot-72.firebasestorage.app",
+    messagingSenderId:"13434525505",
+    appId:"1:13434525505:web:ce09ae5c0a8f39afb0b3c0",
+    measurementId:"G-3NDYYW3QEK"
+};
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.database();
+const menuRef = db.ref('menu');
+const ordRef  = db.ref('orders');
+const setRef  = db.ref('settings');
+
+// ============================================================
+// Password
+// ============================================================
+let PASS = "2026";
+setRef.child('pass').once('value', s => { if (s.val()) PASS = s.val(); });
+
+// ============================================================
+// Login / Logout
+// ============================================================
+function doLogin() {
+    setRef.child('pass').once('value', s => {
+        if (s.val()) PASS = s.val();
+        if (document.getElementById('passInput').value === PASS) {
+            sessionStorage.setItem('safAdm','1');
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display   = 'block';
+            loadAll();
+        } else {
+            document.getElementById('errMsg').style.display = 'block';
+            document.getElementById('passInput').value = '';
+        }
+    });
+}
+function doLogout() { sessionStorage.removeItem('safAdm'); location.reload(); }
+if (sessionStorage.getItem('safAdm') === '1') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display   = 'block';
+    loadAll();
+}
+
+// ============================================================
+// Tabs
+// ============================================================
+function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.add('active');
+    btn.classList.add('active');
+}
+
+// ============================================================
+// Load All
+// ============================================================
+let data = [];
+function loadAll() { loadMenu(); loadOrders(); loadSettings(); loadOffers(); }
+
+// ============================================================
+// Initial Data
+// ============================================================
+const INITIAL = [
+  {id:'c1',name:'ساندوتشات المزاج (فرايد & برجر)',emoji:'🍔',ord:1,items:[
+    {id:'i1',name:'فرايد تشيكن (سفروت)',desc:'خس، طماطم، فلفل، كاتشب، مايونيز',price:'65 | 100 | 135ج',ord:1},
+    {id:'i2',name:'زنجر (سبايسي)',desc:'قطع زنجر حارة مع صوصات سفروت',price:'65 | 100 | 135ج',ord:2},
+    {id:'i3',name:'برجر كلاسيك',desc:'برجر لحم صافي مع صوص تيستي',price:'60 | 95 | 135ج',ord:3},
+    {id:'i4',name:'برجر المزاج',desc:'برجر + تركي مدخن + صوص شيدر',price:'75 | 110 | 145ج',ord:4},
+    {id:'i5',name:'ساندوتش الصاروخ',desc:'فرايد + أصابع جبنة + تركي + شيدر',price:'80ج',ord:5},
+  ]},
+  {id:'c2',name:'كريبات الفراخ',emoji:'🌯',ord:2,items:[
+    {id:'i6',name:'كريب شاورما فراخ (جريل)',desc:'',price:'85ج',ord:1},
+    {id:'i7',name:'كريب فرايد تشيكن (مقرمش)',desc:'',price:'90ج',ord:2},
+    {id:'i8',name:'كريب زنجر (حار نار)',desc:'',price:'90ج',ord:3},
+    {id:'i9',name:'كريب بانية ناجتس',desc:'',price:'65ج',ord:4},
+    {id:'i10',name:'كريب كوردن بلو',desc:'',price:'95ج',ord:5},
+    {id:'i11',name:'كريب برجر فراخ',desc:'',price:'90ج',ord:6},
+    {id:'i12',name:'كريب فاهيتا / شيش طاووق',desc:'',price:'95ج',ord:7},
+  ]},
+  {id:'c3',name:'كريبات اللحوم',emoji:'🥩',ord:3,items:[
+    {id:'i13',name:'كريب هوت دوج (سوسيس)',desc:'',price:'80ج',ord:1},
+    {id:'i14',name:'كريب سجق شرقي',desc:'',price:'85ج',ord:2},
+    {id:'i15',name:'كريب كفتة مشوية',desc:'',price:'85ج',ord:3},
+    {id:'i16',name:'كريب برجر لحم',desc:'',price:'90ج',ord:4},
+    {id:'i17',name:'كريب لحمة مفرومة',desc:'',price:'80ج',ord:5},
+    {id:'i18',name:'كريب ميكس لحوم (سوبر)',desc:'',price:'110ج',ord:6},
+  ]},
+  {id:'c4',name:'ميكسات سفروت المخصوصة',emoji:'⚡',ord:4,items:[
+    {id:'i19',name:'ميكس دويتو (فرايد + بانية)',desc:'',price:'90ج',ord:1},
+    {id:'i20',name:'ميكس سوبر (فرايد/زنجر + هوت دوج)',desc:'',price:'110ج',ord:2},
+    {id:'i21',name:'ميكس العناية',desc:'فرايد + شاورما + هوت دوج',price:'115ج',ord:3},
+    {id:'i22',name:'ميكس الوحش',desc:'كوردن + هوت دوج + تركي',price:'120ج',ord:4},
+    {id:'i23',name:'ميكس الباشا',desc:'برجر + سجق + هوت دوج',price:'125ج',ord:5},
+    {id:'i24',name:'ميكس سفروت (تشكيلة فراخ كاملة)',desc:'',price:'135ج',ord:6},
+  ]},
+  {id:'c5',name:'ساندوتشات الفينو والكيزر',emoji:'🥖',ord:5,items:[
+    {id:'i25',name:'شاورما فراخ / بانية',desc:'',price:'25 | 45ج',ord:1},
+    {id:'i26',name:'هوت دوج / سجق شرقي',desc:'',price:'25 | 45ج',ord:2},
+    {id:'i27',name:'كفتة / برجر لحم',desc:'',price:'25 | 45ج',ord:3},
+    {id:'i28',name:'بطاطس (فينو)',desc:'',price:'15 | 25ج',ord:4},
+  ]},
+  {id:'c6',name:'كريبات البطاطس والجبن',emoji:'🍟',ord:6,items:[
+    {id:'i29',name:'كريب بطاطس',desc:'',price:'50ج',ord:1},
+    {id:'i30',name:'كريب بطاطس موزاريلا',desc:'',price:'60ج',ord:2},
+    {id:'i31',name:'كريب ميكس جبن (رومي/موزاريلا/شيدر)',desc:'',price:'60ج',ord:3},
+    {id:'i32',name:'كريب بطاطس ميكس جبن',desc:'',price:'70ج',ord:4},
+  ]},
+  {id:'c7',name:'كريبات الحلو',emoji:'🍫',ord:7,items:[
+    {id:'i33',name:'كريب نوتيلا',desc:'',price:'50ج',ord:1},
+    {id:'i34',name:'كريب لوتس',desc:'',price:'55ج',ord:2},
+    {id:'i35',name:'كريب نوتيلا بالموز',desc:'',price:'60ج',ord:3},
+    {id:'i36',name:'كريب نوتيلا فواكه',desc:'',price:'65ج',ord:4},
+    {id:'i37',name:'كريب ميكس دمار (نوتيلا+لوتس+أوريو)',desc:'',price:'75ج',ord:5},
+  ]},
+  {id:'c8',name:'الإضافات والصوصات',emoji:'🧂',ord:8,items:[
+    {id:'i38',name:'كاتشب / مايونيز / ثومية',desc:'',price:'10ج',ord:1},
+    {id:'i39',name:'شيدر / هاليبينو / موزاريلا',desc:'',price:'15ج',ord:2},
+    {id:'i40',name:'أصابع جبنة (3 قطع)',desc:'',price:'35ج',ord:3},
+    {id:'i41',name:'بطاطس لغويص (غرقانة صوصات)',desc:'',price:'45ج',ord:4},
+  ]},
+];
+
+// ============================================================
+// Menu Load + Render
+// ============================================================
+function loadMenu() {
+    menuRef.once('value', snap => {
+        const val = snap.val();
+        if (!val) { menuRef.set(INITIAL).then(loadMenu); return; }
+        data = Array.isArray(val) ? val : Object.values(val);
+        data.sort((a,b) => (a.ord||0)-(b.ord||0));
+        render();
+    });
+}
+
+function render() {
+    updateStats();
+    const wrap = document.getElementById('menuWrap');
+    if (!data.length) { wrap.innerHTML='<div class="empty-state">مفيش أقسام</div>'; return; }
+    wrap.innerHTML = data.map((cat,ci) => `
+        <div class="cat-card">
+            <div class="cat-header">
+                <span class="cat-name">${cat.emoji||''} ${cat.name}</span>
+                <div class="cat-actions">
+                    <button class="btn-edit" onclick="openCatModal(${ci})">✏️ تعديل</button>
+                    <button class="btn-del"  onclick="delCat(${ci})">🗑️ حذف</button>
+                </div>
+            </div>
+            <div class="item-list">
+                ${!(cat.items||[]).length ? '<p class="items-empty">مفيش أصناف</p>' :
+                    (cat.items||[]).map((item,ii) => `
+                        <div class="item-row">
+                            <div class="item-info">
+                                <div class="item-name">${item.name}</div>
+                                ${item.desc?`<div class="item-desc">${item.desc}</div>`:''}
+                                <div class="item-price">${item.price}</div>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn-edit" onclick="openItemModal(${ci},${ii})">✏️</button>
+                                <button class="btn-del"  onclick="delItem(${ci},${ii})">🗑️</button>
+                                <button class="btn-log"  onclick="logOrder('${item.id}','${item.name.replace(/'/g,"\\'")}')">+1 🔥</button>
+                            </div>
+                        </div>`).join('')}
+                <button class="btn-add-item" onclick="openItemModal(${ci})">+ إضافة صنف جديد</button>
+            </div>
+        </div>`).join('');
+}
+
+function save() {
+    menuRef.set(data)
+        .then(() => showToast('✅ تم الحفظ!'))
+        .catch(() => showToast('❌ فيه مشكلة في الحفظ'));
+    render();
+}
+
+// ============================================================
+// Stats + Charts
+// ============================================================
+function updateStats() {
+    const allItems  = data.flatMap(c => c.items||[]);
+    const allPrices = allItems.flatMap(i => { const n=(i.price||'').match(/\d+/g); return n?n.map(Number):[]; });
+    document.getElementById('statCats').textContent  = data.length;
+    document.getElementById('statItems').textContent = allItems.length;
+    document.getElementById('statMin').textContent   = allPrices.length ? Math.min(...allPrices)+'ج' : '—';
+    document.getElementById('statMax').textContent   = allPrices.length ? Math.max(...allPrices)+'ج' : '—';
+
+    const maxItems = Math.max(...data.map(c=>(c.items||[]).length), 1);
+    document.getElementById('catChart').innerHTML = data.map(cat => {
+        const cnt = (cat.items||[]).length;
+        const pct = Math.round((cnt/maxItems)*100);
+        return `<div class="bar-row">
+            <div class="bar-label">${cat.emoji||''} ${cat.name}</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"><span class="bar-num">${cnt}</span></div></div>
+        </div>`;
+    }).join('');
+}
+
+// ============================================================
+// Orders — تسجيل وعرض
+// ============================================================
+let ordersData = {};
+
+function loadOrders() {
+    ordRef.once('value', snap => {
+        ordersData = snap.val() || {};
+        renderOrders();
+        renderPeakHours();
+    });
+}
+
+function logOrder(itemId, itemName) {
+    const hour    = new Date().getHours();
+    const current = ordersData[itemId] || { name:itemName, count:0, hours:{} };
+    current.name  = itemName;
+    current.count = (current.count||0) + 1;
+    current.hours = current.hours || {};
+    current.hours[hour] = (current.hours[hour]||0) + 1;
+    ordersData[itemId] = current;
+    ordRef.child(itemId).set(current).then(() => {
+        showToast(`+1 🔥 ${itemName}`);
+        renderOrders();
+        renderPeakHours();
+    }).catch(() => showToast('❌ فيه مشكلة'));
+}
+
+function resetOrder(itemId) {
+    if (!confirm('هتمسح سجل الطلبات لهذا الصنف؟')) return;
+    delete ordersData[itemId];
+    ordRef.child(itemId).remove().then(() => { renderOrders(); renderPeakHours(); showToast('🗑️ تم المسح'); });
+}
+
+function renderOrders() {
+    const list   = document.getElementById('ordersList');
+    const sorted = Object.entries(ordersData).sort((a,b) => (b[1].count||0)-(a[1].count||0));
+    if (!sorted.length) {
+        list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">مفيش طلبات مسجلة — اضغط +1 على أي صنف في تاب المنيو</div>';
+        return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    list.innerHTML = sorted.slice(0,10).map(([id,d],i) => `
+        <div class="order-row">
+            <div class="order-rank">${medals[i]||'🔸'}</div>
+            <div class="order-name">${d.name}</div>
+            <div class="order-count">${d.count} طلب</div>
+            <button class="btn-order-reset" onclick="resetOrder('${id}')">مسح</button>
+        </div>`).join('');
+}
+
+function renderPeakHours() {
+    const hourTotals = Array(24).fill(0);
+    Object.values(ordersData).forEach(item => {
+        if (!item.hours) return;
+        Object.entries(item.hours).forEach(([h,c]) => { hourTotals[parseInt(h)] += c; });
+    });
+    const maxH = Math.max(...hourTotals, 1);
+    const totalOrders = hourTotals.reduce((a,b)=>a+b,0);
+    const peakH = totalOrders > 0 ? hourTotals.indexOf(Math.max(...hourTotals)) : -1;
+
+    const workHours = [12,13,14,15,16,17,18,19,20,21,22,23,0,1,2];
+    document.getElementById('hoursChart').innerHTML = workHours.map(h => {
+        const cnt   = hourTotals[h];
+        const pct   = Math.round((cnt/maxH)*100);
+        const isPeak = (h === peakH && totalOrders > 0);
+        const lbl   = h === 0?'12ص': h<=2?h+'ص': h===12?'12م': h>12?(h-12)+'م': h+'ص';
+        return `<div class="hour-bar-wrap">
+            <div class="hour-bar${isPeak?' peak':''}" style="height:${Math.max(pct,3)}%"></div>
+            <div class="hour-label">${lbl}</div>
+        </div>`;
+    }).join('');
+
+    const note = document.getElementById('hoursNote');
+    if (totalOrders > 0) {
+        const pl = peakH===0?'12 صباحاً':peakH<=2?peakH+' صباحاً':peakH===12?'12 مساءً':peakH>12?(peakH-12)+' مساءً':peakH+' صباحاً';
+        note.textContent = `⚡ ساعة الذروة: ${pl} — إجمالي الطلبات: ${totalOrders}`;
+    } else {
+        note.textContent = 'سجّل طلبات من تاب المنيو (+1) عشان تظهر البيانات هنا';
+    }
+}
+
+// ============================================================
+// Settings
+// ============================================================
+function loadSettings() {
+    setRef.child('hours').once('value', snap => {
+        const v = snap.val();
+        if (!v) return;
+        if (v.shift1Open)  document.getElementById('shift1Open').value  = v.shift1Open;
+        if (v.shift1Close) document.getElementById('shift1Close').value = v.shift1Close;
+        if (v.shift2Open)  document.getElementById('shift2Open').value  = v.shift2Open;
+        if (v.shift2Close) document.getElementById('shift2Close').value = v.shift2Close;
+    });
+}
+
+function saveHours() {
+    const s1o = document.getElementById('shift1Open').value;
+    const s1c = document.getElementById('shift1Close').value;
+    const s2o = document.getElementById('shift2Open').value;
+    const s2c = document.getElementById('shift2Close').value;
+    if (!s1o||!s1c||!s2o||!s2c) { showToast('❌ اكتب كل الأوقات!'); return; }
+    setRef.child('hours').set({ shift1Open:s1o, shift1Close:s1c, shift2Open:s2o, shift2Close:s2c })
+        .then(() => showToast('✅ تم حفظ المواعيد!'))
+        .catch(() => showToast('❌ فيه مشكلة'));
+}
+
+function changePass() {
+    const oldP  = document.getElementById('oldPass').value;
+    const newP  = document.getElementById('newPass').value;
+    const confP = document.getElementById('confirmPass').value;
+    if (oldP !== PASS)   { showToast('❌ الباسورد الحالي غلط!'); return; }
+    if (newP.length < 6) { showToast('❌ الباسورد لازم 6 حروف على الأقل'); return; }
+    if (newP !== confP)  { showToast('❌ الباسورد الجديد مش متطابق!'); return; }
+    setRef.child('pass').set(newP).then(() => {
+        PASS = newP;
+        ['oldPass','newPass','confirmPass'].forEach(id => document.getElementById(id).value = '');
+        showToast('✅ تم تغيير الباسورد!');
+    }).catch(() => showToast('❌ فيه مشكلة'));
+}
+
+// ============================================================
+// Modal
+// ============================================================
+let mMode='', mCi=-1, mIi=-1;
+
+function openCatModal(ci=-1) {
+    mMode = ci===-1?'addCat':'editCat'; mCi=ci;
+    const cat = ci!==-1?data[ci]:{};
+    document.getElementById('modalTitle').textContent = ci===-1?'➕ إضافة قسم جديد':'✏️ تعديل القسم';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="form-group"><label>اسم القسم</label><input id="f1" type="text" value="${cat.name||''}" placeholder="مثلاً: كريبات الفراخ"></div>
+        <div class="form-group"><label>إيموجي</label><input id="f2" type="text" value="${cat.emoji||''}" placeholder="🌯" style="font-size:1.3rem;"></div>`;
+    openModal(); setTimeout(()=>document.getElementById('f1').focus(),100);
+}
+
+function openItemModal(ci, ii=-1) {
+    mMode=ii===-1?'addItem':'editItem'; mCi=ci; mIi=ii;
+    const item=ii!==-1?data[ci].items[ii]:{};
+    document.getElementById('modalTitle').textContent = ii===-1?'➕ إضافة صنف':'✏️ تعديل الصنف';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="form-group"><label>اسم الصنف *</label><input id="f1" type="text" value="${item.name||''}" placeholder="مثلاً: كريب زنجر"></div>
+        <div class="form-group"><label>الوصف (اختياري)</label><input id="f2" type="text" value="${item.desc||''}" placeholder="حار نار مع صوص خاص"></div>
+        <div class="form-group"><label>السعر *</label><input id="f3" type="text" value="${item.price||''}" placeholder="85ج  أو  65 | 100 | 135ج"><div class="form-hint">لو في أحجام، افصل الأسعار بـ |</div></div>`;
+    openModal(); setTimeout(()=>document.getElementById('f1').focus(),100);
+}
+
+function openModal()  { document.getElementById('overlay').classList.add('open'); }
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+
+function doSave() {
+    const f1=document.getElementById('f1').value.trim();
+    const f2=document.getElementById('f2')?document.getElementById('f2').value.trim():'';
+    const f3=document.getElementById('f3')?document.getElementById('f3').value.trim():'';
+    if (mMode === 'offer') { saveOffer(); return; }
+    if (mMode==='addCat'||mMode==='editCat') {
+        if (!f1){alert('اكتب اسم القسم!');return;}
+        if(mMode==='addCat') data.push({id:'c_'+Date.now(),name:f1,emoji:f2,ord:data.length+1,items:[]});
+        else { data[mCi].name=f1; data[mCi].emoji=f2; }
+    } else {
+        if(!f1||!f3){alert('الاسم والسعر مطلوبين!');return;}
+        if(!data[mCi].items) data[mCi].items=[];
+        const obj={id:'i_'+Date.now(),name:f1,desc:f2,price:f3,ord:data[mCi].items.length+1};
+        if(mMode==='addItem') data[mCi].items.push(obj);
+        else data[mCi].items[mIi]={...data[mCi].items[mIi],...obj};
+    }
+    save(); closeModal();
+}
+
+function delCat(ci) {
+    if(!confirm(`هتحذف قسم "${data[ci].name}" وكل أصنافه!\nمتأكد؟`))return;
+    data.splice(ci,1); save();
+}
+function delItem(ci,ii) {
+    if(!confirm(`هتحذف "${data[ci].items[ii].name}"!\nمتأكد؟`))return;
+    data[ci].items.splice(ii,1); save();
+}
+
+document.getElementById('overlay').addEventListener('click', e => {
+    if(e.target===document.getElementById('overlay')) closeModal();
+});
+
+// ============================================================
+// Offers
+// ============================================================
+const offersRef = db.ref('offers');
+let offersData  = {};
+
+function loadOffers() {
+    offersRef.once('value', snap => {
+        offersData = snap.val() || {};
+        renderOffers();
+    });
+}
+
+function renderOffers() {
+    const wrap   = document.getElementById('offersList');
+    const sorted = Object.entries(offersData).sort((a,b) => (b[1].createdAt||0)-(a[1].createdAt||0));
+    if (!sorted.length) {
+        wrap.innerHTML = '<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">مفيش عروض حالياً — اضغط إضافة عرض جديد</div>';
+        return;
+    }
+    wrap.innerHTML = sorted.map(([id, o]) => `
+        <div class="offer-card ${o.active?'':'inactive'}">
+            <div class="offer-body">
+                <div class="offer-title">🔥 ${o.title}</div>
+                ${o.desc ? `<div class="offer-desc">${o.desc}</div>` : ''}
+                ${o.price ? `<div class="offer-desc" style="color:var(--orange);font-weight:700;margin-top:4px">${o.price}ج</div>` : ''}
+                <span class="offer-badge ${o.active?'active':'inactive'}">${o.active?'✅ ظاهر':'🔴 مخفي'}</span>
+            </div>
+            <div class="offer-actions">
+                <button class="btn-edit" onclick="toggleOffer('${id}')">${o.active?'إخفاء':'إظهار'}</button>
+                <button class="btn-edit" onclick="openOfferModal('${id}')">✏️</button>
+                <button class="btn-del"  onclick="deleteOffer('${id}')">🗑️</button>
+            </div>
+        </div>`).join('');
+}
+
+function openOfferModal(id = null) {
+    const o = id ? offersData[id] : {};
+    document.getElementById('modalTitle').textContent = id ? '✏️ تعديل العرض' : '➕ عرض جديد';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="form-group"><label>عنوان العرض *</label><input id="f1" type="text" value="${o.title||''}" placeholder="مثلاً: عرض الليلة فقط 🔥"></div>
+        <div class="form-group"><label>التفاصيل (اختياري)</label><input id="f2" type="text" value="${o.desc||''}" placeholder="مثلاً: اشتري اتنين كريب واحصل على الثالث مجاناً"></div>
+        <div class="form-group"><label>السعر *</label><input id="f3" type="text" value="${o.price||''}" placeholder="مثلاً: 99"></div>
+        <input type="hidden" id="f_offer_id" value="${id||''}">`;
+    mMode = 'offer';
+    openModal();
+    setTimeout(() => document.getElementById('f1').focus(), 100);
+}
+
+function saveOffer() {
+    const title = document.getElementById('f1').value.trim();
+    const desc  = document.getElementById('f2').value.trim();
+    const price = document.getElementById('f3').value.trim();
+    const id    = document.getElementById('f_offer_id').value || 'o_' + Date.now();
+    if (!title) { showToast('❌ اكتب عنوان العرض!'); return; }
+    if (!price) { showToast('❌ اكتب السعر!'); return; }
+    const obj = { title, desc, price, active: offersData[id]?.active ?? true, createdAt: offersData[id]?.createdAt || Date.now() };
+    offersRef.child(id).set(obj).then(() => {
+        offersData[id] = obj;
+        renderOffers();
+        showToast('✅ تم حفظ العرض!');
+        closeModal();
+    }).catch(() => showToast('❌ فيه مشكلة'));
+}
+
+function toggleOffer(id) {
+    offersData[id].active = !offersData[id].active;
+    offersRef.child(id).update({ active: offersData[id].active }).then(() => {
+        renderOffers();
+        showToast(offersData[id].active ? '✅ العرض ظاهر دلوقتي' : '🔴 العرض اتأخفى');
+    });
+}
+
+function deleteOffer(id) {
+    if (!confirm('هتحذف العرض ده؟')) return;
+    offersRef.child(id).remove().then(() => {
+        delete offersData[id];
+        renderOffers();
+        showToast('🗑️ تم الحذف');
+    });
+}
+
+// ============================================================
+// Toast
+// ============================================================
+function showToast(msg) {
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
