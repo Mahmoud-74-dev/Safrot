@@ -1,4 +1,4 @@
-const cacheName = 'safroot-menu-v1';
+const cacheName = 'safroot-menu-v2';
 const assets = [
   './',
   './index.html',
