@@ -8,9 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ff6b00">
-<link rel="apple-touch-icon" href="safrot.png">
-
+    <meta name="theme-color" content="#ff6b00">
+    <link rel="apple-touch-icon" href="safrot.png">
 </head>
 <body>
 
@@ -29,114 +28,136 @@
 
     <div class="container">
     
-    <button class="accordion">ساندوتشات المزاج (فرايد & برجر) 🍔<span>+</span></button>
-    <div class="panel">
-        <div class="item">
-            <div class="item-info"><span>فرايد تشيكن (سفروت)</span><p>خس، طماطم، فلفل، كاتشب، مايونيز</p></div>
-            <div class="price-section"><span class="price">65 | 100 | 135ج</span><span class="sizes">سنجل | دبل | تريبل</span></div>
+        <button class="accordion">ساندوتشات المزاج (فرايد & برجر) 🍔<span>+</span></button>
+        <div class="panel">
+            <div class="item" onclick="openOptionsModal('فرايد تشيكن (سفروت)', '65,100,135', 'سنجل,دبل,تريبل')">
+                <div class="item-info"><span>فرايد تشيكن (سفروت)</span><p>خس، طماطم، فلفل، كاتشب، مايونيز</p></div>
+                <div class="price-section"><span class="price">65 | 100 | 135ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
+            </div>
+            <div class="item" onclick="openOptionsModal('زنجر (سبايسي)', '65,100,135', 'سنجل,دبل,تريبل')">
+                <div class="item-info"><span>زنجر (سبايسي)</span><p>قطع زنجر حارة مع صوصات سفروت</p></div>
+                <div class="price-section"><span class="price">65 | 100 | 135ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
+            </div>
+            <div class="item" onclick="openOptionsModal('برجر كلاسيك', '60,95,135', 'سنجل,دبل,تريبل')">
+                <div class="item-info"><span>برجر كلاسيك</span><p>برجر لحم صافي مع صوص تيستي</p></div>
+                <div class="price-section"><span class="price">60 | 95 | 135ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
+            </div>
+            <div class="item" onclick="openOptionsModal('برجر المزاج', '75,110,145', 'سنجل,دبل,تريبل')">
+                <div class="item-info"><span>برجر المزاج</span><p>برجر + تركي مدخن + صوص شيدر</p></div>
+                <div class="price-section"><span class="price">75 | 110 | 145ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
+            </div>
+            <div class="item" onclick="addToCart('ساندوتش الصاروخ', 'جامبو', 80)">
+                <div class="item-info"><span>ساندوتش الصاروخ</span><p>فرايد + أصابع جبنة + تركي + شيدر</p></div>
+                <div class="price-section"><span class="price">80ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div>
+            </div>
         </div>
-        <div class="item">
-            <div class="item-info"><span>زنجر (سبايسي)</span><p>قطع زنجر حارة مع صوصات سفروت</p></div>
-            <div class="price-section"><span class="price">65 | 100 | 135ج</span><span class="sizes">سنجل | دبل | تريبل</span></div>
+
+        <button class="accordion">كريبات الفراخ 🌯<span>+</span></button>
+        <div class="panel">
+            <div class="item" onclick="addToCart('كريب شاورما فراخ', 'جريل', 85)"><span>كريب شاورما فراخ (جريل)</span><div class="price-section"><span class="price">85ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب فرايد تشيكن', 'مقرمش', 90)"><span>كريب فرايد تشيكن (مقرمش)</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب زنجر', 'حار نار', 90)"><span>كريب زنجر (حار نار)</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب بانية ناجتس', 'عادي', 65)"><span>كريب بانية ناجتس</span><div class="price-section"><span class="price">65ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب كوردن بلو', 'عادي', 95)"><span>كريب كوردن بلو</span><div class="price-section"><span class="price">95ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب برجر فراخ', 'عادي', 90)"><span>كريب برجر فراخ</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="openOptionsModal('كريب فاهيتا أو شيش', '95', 'فاهيتا,شيش طاووق')"><span>كريب فاهيتا / شيش طاووق</span><div class="price-section"><span class="price">95ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
         </div>
-        <div class="item">
-            <div class="item-info"><span>برجر كلاسيك</span><p>برجر لحم صافي مع صوص تيستي</p></div>
-            <div class="price-section"><span class="price">60 | 95 | 135ج</span><span class="sizes">سنجل | دبل | تريبل</span></div>
+
+        <button class="accordion">كريبات اللحوم 🥩<span>+</span></button>
+        <div class="panel">
+            <div class="item" onclick="addToCart('كريب هوت دوج', 'سوسيس', 80)"><span>كريب هوت دوج (سوسيس)</span><div class="price-section"><span class="price">80ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب سجق شرقي', 'عادي', 85)"><span>كريب سجق شرقي</span><div class="price-section"><span class="price">85ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب كفتة مشوية', 'عادي', 85)"><span>كريب كفتة مشوية</span><div class="price-section"><span class="price">85ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب برجر لحم', 'عادي', 90)"><span>كريب برجر لحم</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب لحمة مفرومة', 'عادي', 80)"><span>كريب لحمة مفرومة</span><div class="price-section"><span class="price">80ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب ميكس لحوم', 'سوبر', 110)"><span>كريب ميكس لحوم (سوبر)</span><div class="price-section"><span class="price">110ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
         </div>
-        <div class="item">
-            <div class="item-info"><span>برجر المزاج</span><p>برجر + تركي مدخن + صوص شيدر</p></div>
-            <div class="price-section"><span class="price">75 | 110 | 145ج</span><span class="sizes">سنجل | دبل | تريبل</span></div>
+
+        <button class="accordion">ميكسات سفروت المخصوصة ⚡<span>+</span></button>
+        <div class="panel">
+            <div class="item" onclick="addToCart('ميكس دويتو', 'فرايد+بانية', 90)"><span>ميكس دويتو (فرايد + بانية)</span><div class="price-section"><span class="price">90ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="openOptionsModal('ميكس سوبر', '110', 'فرايد+هوت دوج,زنجر+هوت دوج')"><span>ميكس سوبر (فرايد/زنجر + هوت دوج)</span><div class="price-section"><span class="price">110ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('ميكس العناية', 'فرايد+شاورما+هوت دوج', 115)"><span>ميكس العناية (فرايد + شاورما + هوت دوج)</span><div class="price-section"><span class="price">115ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('ميكس الوحش', 'كوردن+هوت دوج+تركي', 120)"><span>ميكس الوحش (كوردن + هوت دوج + تركي)</span><div class="price-section"><span class="price">120ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('ميكس الباشا', 'برجر+سجق+هوت دوج', 125)"><span>ميكس الباشا (برجر + سجق + هوت دوج)</span><div class="price-section"><span class="price">125ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('ميكس سفروت', 'تشكيلة كاملة', 135)"><span>ميكس سفروت (تشكيلة فراخ كاملة)</span><div class="price-section"><span class="price">135ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
         </div>
-        <div class="item">
-            <div class="item-info"><span>ساندوتش الصاروخ</span><p>فرايد + أصابع جبنة + تركي + شيدر</p></div>
-            <div class="price-section"><span class="price">80ج</span><span class="sizes">قطعة واحدة جامبو</span></div>
+
+        <button class="accordion">ساندوتشات الفينو والكيزر 🥖<span>+</span></button>
+        <div class="panel">
+            <div class="item" onclick="openOptionsModal('شاورما أو بانية (فينو)', '25,45', 'شاورما فراخ صغير,شاورما فراخ كبير,بانية صغير,بانية كبير')"><span>شاورما فراخ / بانية</span><div class="price-section"><span class="price">25 | 45ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="openOptionsModal('هوت دوج أو سجق (فينو)', '25,45', 'هوت دوج صغير,هوت دوج كبير,سجق صغير,سجق كبير')"><span>هوت دوج / سجق شرقي</span><div class="price-section"><span class="price">25 | 45ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="openOptionsModal('كفتة أو برجر (فينو)', '25,45', 'كفتة صغير,كفتة كبير,برجر صغير,برجر كبير')"><span>كفتة / برجر لحم</span><div class="price-section"><span class="price">25 | 45ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="openOptionsModal('بطاطس (فينو)', '15,25', 'صغير,كبير')"><span>بطاطس (فينو)</span><div class="price-section"><span class="price">15 | 25ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+        </div>
+
+        <button class="accordion">كريبات البطاطس والجبن 🍟<span>+</span></button>
+        <div class="panel">
+            <div class="item" onclick="addToCart('كريب بطاطس', 'عادي', 50)"><span>كريب بطاطس</span><div class="price-section"><span class="price">50ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب بطاطس موزاريلا', 'عادي', 60)"><span>كريب بطاطس موزاريلا</span><div class="price-section"><span class="price">60ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب ميكس جبن', 'رومي+موزاريلا+شيدر', 60)"><span>كريب ميكس جبن (رومي/موزاريلا/شيدر)</span><div class="price-section"><span class="price">60ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب بطاطس ميكس جبن', 'ميكس', 70)"><span>كريب بطاطس ميكس جبن</span><div class="price-section"><span class="price">70ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+        </div>
+
+        <button class="accordion">كريبات الحلو 🍫<span>+</span></button>
+        <div class="panel">
+            <div class="item" onclick="addToCart('كريب نوتيلا', 'عادي', 50)"><span>كريب نوتيلا</span><div class="price-section"><span class="price">50ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب لوتس', 'عادي', 55)"><span>كريب لوتس</span><div class="price-section"><span class="price">55ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب نوتيلا بالموز', 'عادي', 60)"><span>كريب نوتيلا بالموز</span><div class="price-section"><span class="price">60ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب نوتيلا فواكه', 'عادي', 65)"><span>كريب نوتيلا فواكه</span><div class="price-section"><span class="price">65ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('كريب ميكس دمار', 'نوتيلا+لوتس+أوريو', 75)"><span>كريب ميكس دمار (نوتيلا+لوتس+أوريو)</span><div class="price-section"><span class="price">75ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+        </div>
+
+        <button class="accordion">الإضافات والصوصات 🧂<span>+</span></button>
+        <div class="panel">
+            <div class="item" onclick="openOptionsModal('اختر الصوص', '10', 'كاتشب,مايونيز,ثومية')"><span>إضافة (كاتشب / مايونيز / ثومية)</span><div class="price-section"><span class="price">10ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="openOptionsModal('اختر الإضافة', '15', 'شيدر,هاليبينو,موزاريلا')"><span>إضافة (شيدر / هاليبينو / موزاريلا)</span><div class="price-section"><span class="price">15ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('أصابع جبنة', '3 قطع', 35)"><span>أصابع جبنة (3 قطع)</span><div class="price-section"><span class="price">35ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+            <div class="item" onclick="addToCart('بطاطس لغويص', 'طبق', 45)"><span>بطاطس لغويص (غرقانة صوصات)</span><div class="price-section"><span class="price">45ج</span><button class="add-btn"><i class="fas fa-plus"></i></button></div></div>
+        </div>
+
+    </div>
+
+    <div id="sizeModal" class="modal">
+        <div class="modal-content glass">
+            <h3 id="modalItemName"></h3>
+            <p>اختر من القائمة:</p>
+            <div id="sizeOptions"></div>
+            <button onclick="closeModal()" class="close-btn">إلغاء</button>
         </div>
     </div>
 
-    <button class="accordion">كريبات الفراخ 🌯<span>+</span></button>
-    <div class="panel">
-        <div class="item"><span>كريب شاورما فراخ (جريل)</span><span class="price">85ج</span></div>
-        <div class="item"><span>كريب فرايد تشيكن (مقرمش)</span><span class="price">90ج</span></div>
-        <div class="item"><span>كريب زنجر (حار نار)</span><span class="price">90ج</span></div>
-        <div class="item"><span>كريب بانية ناجتس</span><span class="price">65ج</span></div>
-        <div class="item"><span>كريب كوردن بلو</span><span class="price">95ج</span></div>
-        <div class="item"><span>كريب برجر فراخ</span><span class="price">90ج</span></div>
-        <div class="item"><span>كريب فاهيتا / شيش طاووق</span><span class="price">95ج</span></div>
+    <div id="cartTrigger" class="cart-fab" onclick="toggleCart()">
+        <i class="fas fa-shopping-basket"></i>
+        <span id="cartCount">0</span>
     </div>
 
-    <button class="accordion">كريبات اللحوم 🥩<span>+</span></button>
-    <div class="panel">
-        <div class="item"><span>كريب هوت دوج (سوسيس)</span><span class="price">80ج</span></div>
-        <div class="item"><span>كريب سجق شرقي</span><span class="price">85ج</span></div>
-        <div class="item"><span>كريب كفتة مشوية</span><span class="price">85ج</span></div>
-        <div class="item"><span>كريب برجر لحم</span><span class="price">90ج</span></div>
-        <div class="item"><span>كريب لحمة مفرومة</span><span class="price">80ج</span></div>
-        <div class="item"><span>كريب ميكس لحوم (سوبر)</span><span class="price">110ج</span></div>
+    <div id="cartModal" class="cart-sidebar">
+        <div class="cart-header">
+            <h2>سلة الطلبات</h2>
+            <button onclick="toggleCart()" class="close-cart">&times;</button>
+        </div>
+        <div id="cartItems"></div>
+        <div class="cart-footer">
+            <div class="total">الإجمالي: <span id="cartTotal">0</span> ج</div>
+            <button onclick="sendOrder()" class="order-btn">إتمام الطلب (واتساب) <i class="fab fa-whatsapp"></i></button>
+        </div>
     </div>
 
-    <button class="accordion">ميكسات سفروت المخصوصة ⚡<span>+</span></button>
-    <div class="panel">
-        <div class="item"><span>ميكس دويتو (فرايد + بانية)</span><span class="price">90ج</span></div>
-        <div class="item"><span>ميكس سوبر (فرايد/زنجر + هوت دوج)</span><span class="price">110ج</span></div>
-        <div class="item"><span>ميكس العناية (فرايد + شاورما + هوت دوج)</span><span class="price">115ج</span></div>
-        <div class="item"><span>ميكس الوحش (كوردن + هوت دوج + تركي)</span><span class="price">120ج</span></div>
-        <div class="item"><span>ميكس الباشا (برجر + سجق + هوت دوج)</span><span class="price">125ج</span></div>
-        <div class="item"><span>ميكس سفروت (تشكيلة فراخ كاملة)</span><span class="price">135ج</span></div>
-    </div>
-
-    <button class="accordion">ساندوتشات الفينو والكيزر 🥖<span>+</span></button>
-    <div class="panel">
-        <div class="item"><span>شاورما فراخ / بانية</span><span class="price">25 | 45ج</span></div>
-        <div class="item"><span>هوت دوج / سجق شرقي</span><span class="price">25 | 45ج</span></div>
-        <div class="item"><span>كفتة / برجر لحم</span><span class="price">25 | 45ج</span></div>
-        <div class="item"><span>بطاطس (فينو)</span><span class="price">15 | 25ج</span></div>
-    </div>
-
-    <button class="accordion">كريبات البطاطس والجبن 🍟<span>+</span></button>
-    <div class="panel">
-        <div class="item"><span>كريب بطاطس</span><span class="price">50ج</span></div>
-        <div class="item"><span>كريب بطاطس موزاريلا</span><span class="price">60ج</span></div>
-        <div class="item"><span>كريب ميكس جبن (رومي/موزاريلا/شيدر)</span><span class="price">60ج</span></div>
-        <div class="item"><span>كريب بطاطس ميكس جبن</span><span class="price">70ج</span></div>
-    </div>
-
-    <button class="accordion">كريبات الحلو 🍫<span>+</span></button>
-    <div class="panel">
-        <div class="item"><span>كريب نوتيلا</span><span class="price">50ج</span></div>
-        <div class="item"><span>كريب لوتس</span><span class="price">55ج</span></div>
-        <div class="item"><span>كريب نوتيلا بالموز</span><span class="price">60ج</span></div>
-        <div class="item"><span>كريب نوتيلا فواكه</span><span class="price">65ج</span></div>
-        <div class="item"><span>كريب ميكس دمار (نوتيلا+لوتس+أوريو)</span><span class="price">75ج</span></div>
-    </div>
-
-    <button class="accordion">الإضافات والصوصات 🧂<span>+</span></button>
-    <div class="panel">
-        <div class="item"><span>إضافة (كاتشب / مايونيز / ثومية)</span><span class="price">10ج</span></div>
-        <div class="item"><span>إضافة (شيدر / هاليبينو / موزاريلا)</span><span class="price">15ج</span></div>
-        <div class="item"><span>أصابع جبنة (3 قطع)</span><span class="price">35ج</span></div>
-        <div class="item"><span>بطاطس لغويص (غرقانة صوصات)</span><span class="price">45ج</span></div>
-    </div>
-
-</div>
-
-
- <footer>
+    <footer>
         <div class="footer-info">
-            <p>📍 العنوان: أسيوط - منفلوط - شارع العشرين - خلف  موقف الحواتكة - بجوار ستوديو زووم</p>
+            <p>📍 العنوان: أسيوط - منفلوط - شارع العشرين - خلف موقف الحواتكة - بجوار ستوديو زووم</p>
             <p>🕒 مواعيد العمل: من 1 ظهراً حتى 2 بعد منتصف الليل</p>
         </div>
-        
-    <div class="contact-buttons">
-        <a href="https://api.whatsapp.com/send?phone=+201063441939" target="_blank" class="wa-btn">
-            <i class="fab fa-whatsapp"></i> واتساب
-        </a>
+        <div class="contact-buttons">
+            <a href="https://api.whatsapp.com/send?phone=+201063441939" target="_blank" class="wa-btn">
+                <i class="fab fa-whatsapp"></i> واتساب
+            </a>
             <a href="https://www.facebook.com/share/18PGB1cUcs/" target="_blank" class="fb-btn">
                 <i class="fab fa-facebook-f"></i> فيسبوك
             </a>
         </div>
     </footer>
-
-
 
     <script src="script.js"></script>
 </body>
