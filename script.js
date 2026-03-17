@@ -181,19 +181,37 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let message = "طلب جديد من *سفروت* 🌯\n\n";
-        message += "🛒 *الطلب:*\n";
+        // احسب الإجمالي من السلة مباشرة
+        const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+        let message = "طلب جديد من *سفروت*\n\n";
+        message += "*الطلب:*\n";
         cart.forEach((item, i) => {
             message += `${i+1}. *${item.name}* (${item.variant})`;
-            if (item.qty > 1) message += ` × ${item.qty}`;
-            message += ` - ${item.price * item.qty}ج\n`;
+            if (item.qty > 1) message += ` x${item.qty}`;
+            message += ` - ${item.price * item.qty} ج\n`;
         });
-        message += `\n💰 *الإجمالي:* ${document.getElementById('cartTotal').innerText} جنيه`;
-        message += `\n\n🏠 *العنوان:* ${address}`;
-        if (notes) message += `\n📝 *ملاحظات:* ${notes}`;
+        message += `\n*الاجمالي:* ${total} جنيه`;
+        message += `\n\n*العنوان:* ${address}`;
+        if (notes) message += `\n*ملاحظات:* ${notes}`;
 
         const encodedMsg = encodeURIComponent(message);
         window.open(`https://api.whatsapp.com/send?phone=+201063441939&text=${encodedMsg}`);
+
+        // تسجيل الطلب في Firebase أوتوماتيك
+        const ordRef = firebase.database().ref('orders');
+        const hour   = new Date().getHours();
+        cart.forEach(item => {
+            const id  = item.id || item.name.replace(/\s+/g,'_').substring(0,20);
+            ordRef.child(id).once('value', snap => {
+                const cur = snap.val() || { name: item.name, count: 0, hours: {} };
+                cur.name   = item.name;
+                cur.count  = (cur.count || 0) + item.qty;
+                cur.hours  = cur.hours || {};
+                cur.hours[hour] = (cur.hours[hour] || 0) + item.qty;
+                ordRef.child(id).set(cur);
+            });
+        });
     };
 
     // إغلاق المودال عند الضغط خارجه
